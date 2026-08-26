@@ -94,6 +94,70 @@ export function renderCV(data: CVData, templateId: string): string {
     ? `<h2 class="sec">Ringkasan</h2><p>${esc(d.summary)}</p>`
     : "";
 
+  // --- Optional sections (auto-skipped when empty) ---
+  const certHtml =
+    d.certifications.length > 0
+      ? `<h2 class="sec">Sertifikasi</h2>` +
+        d.certifications
+          .map(
+            (c) => `
+      <div class="item" style="margin-bottom:6px;">
+        <div class="item-head">
+          <span class="item-title">${esc(c.name)}${c.issuer ? `, ${esc(c.issuer)}` : ""}</span>
+          <span class="meta">${esc(c.year)}</span>
+        </div>
+      </div>`
+          )
+          .join("")
+      : "";
+
+  const orgHtml =
+    d.organizations.length > 0
+      ? `<h2 class="sec">Organisasi & Volunteer</h2>` +
+        d.organizations
+          .map(
+            (o) => `
+      <div class="item" style="margin-bottom:8px;">
+        <div class="item-head">
+          <span class="item-title">${esc(o.name)}${o.role ? ` - ${esc(o.role)}` : ""}</span>
+          <span class="meta">${esc(fmtRange(o.start, o.end))}</span>
+        </div>
+        ${bullets(o.description)}
+      </div>`
+          )
+          .join("")
+      : "";
+
+  const projHtml =
+    d.projects.length > 0
+      ? `<h2 class="sec">Proyek</h2>` +
+        d.projects
+          .map((pr) => {
+            const link = pr.link
+              ? ` <a href="${esc(pr.link)}" style="color:#059669;">${esc(pr.link)}</a>`
+              : "";
+            return `
+      <div class="item" style="margin-bottom:8px;">
+        <div class="item-head">
+          <span class="item-title">${esc(pr.name)}${pr.role ? ` - ${esc(pr.role)}` : ""}</span>
+        </div>
+        ${bullets(pr.description)}${link}
+      </div>`;
+          })
+          .join("")
+      : "";
+
+  const langHtml =
+    d.languages.length > 0
+      ? `<h2 class="sec">Bahasa</h2><p>${d.languages
+          .filter((l) => l.name)
+          .map((l) => esc(l.level ? `${l.name} (${l.level})` : l.name))
+          .join(" · ")}</p>`
+      : "";
+
+  // Optional block appended near the end of most templates.
+  const extrasHtml = certHtml + orgHtml + projHtml + langHtml;
+
   switch (templateId) {
     case "T2": // Minimal ATS - thin dividers, Calibri-ish
       return `<!DOCTYPE html><html><head><style>
@@ -105,7 +169,7 @@ export function renderCV(data: CVData, templateId: string): string {
         <header style="margin-bottom:6px;"><h1>${esc(d.fullName)}</h1>
         ${d.jobTitle ? `<p style="font-size:11pt;color:#444;">${esc(d.jobTitle)}</p>` : ""}
         <p style="font-size:9.5pt;color:#555;">${contact}</p></header>
-        ${summaryHtml}${expHtml}${eduHtml}${skillsHtml}
+        ${summaryHtml}${expHtml}${eduHtml}${extrasHtml}${skillsHtml}
         </body></html>`;
 
     case "T3": // Clean Serif
@@ -118,7 +182,7 @@ export function renderCV(data: CVData, templateId: string): string {
         <header style="text-align:center;margin-bottom:8px;"><h1>${esc(d.fullName)}</h1>
         ${d.jobTitle ? `<p style="font-size:11pt;">${esc(d.jobTitle)}</p>` : ""}
         <p style="font-size:9.5pt;color:#555;">${contact}</p></header>
-        ${summaryHtml}${expHtml}${eduHtml}${skillsHtml}
+        ${summaryHtml}${expHtml}${eduHtml}${extrasHtml}${skillsHtml}
         </body></html>`;
 
     case "T4": // Modern Bar - colored header band
@@ -133,7 +197,7 @@ export function renderCV(data: CVData, templateId: string): string {
         <header><h1>${esc(d.fullName)}</h1>
         ${d.jobTitle ? `<p class="jobtitle">${esc(d.jobTitle)}</p>` : ""}
         <p class="contact">${contact}</p></header>
-        ${summaryHtml}${expHtml}${eduHtml}${skillsHtml}
+        ${summaryHtml}${expHtml}${eduHtml}${extrasHtml}${skillsHtml}
         </body></html>`;
 
     case "T5": // Two-Safe: narrow left rail (skills/contact), wide right (linear)
@@ -152,12 +216,12 @@ export function renderCV(data: CVData, templateId: string): string {
         </div>
         <div class="main">
           ${d.summary ? `<h2 class="sec">Ringkasan</h2><p>${esc(d.summary)}</p>` : ""}
-          ${expHtml}${eduHtml}
+          ${expHtml}${eduHtml}${extrasHtml}
         </div>
         </body></html>`;
 
     case "T6": { // Fresh Grad: education first
-      const freshOrder = `${eduHtml}${expHtml}${summaryHtml}${skillsHtml}`;
+      const freshOrder = `${eduHtml}${expHtml}${summaryHtml}${extrasHtml}${skillsHtml}`;
       return `<!DOCTYPE html><html><head><style>
         ${BASE_CSS}
         h1 { font-size:18pt; }
@@ -179,7 +243,7 @@ export function renderCV(data: CVData, templateId: string): string {
         </style></head><body>
         <header style="margin-bottom:4px;"><h1 style="font-size:17pt;">${esc(d.fullName)}</h1>
         <p style="font-size:9.5pt;color:#555;">${[d.jobTitle, contact].filter(Boolean).map(esc).join(" | ")}</p></header>
-        ${summaryHtml}${expHtml}${eduHtml}${skillsHtml}
+        ${summaryHtml}${expHtml}${eduHtml}${extrasHtml}${skillsHtml}
         </body></html>`;
 
     case "T8": // Bold Header: huge name + accent rule
@@ -191,16 +255,15 @@ export function renderCV(data: CVData, templateId: string): string {
         <header><h1>${esc(d.fullName)}</h1>
         <div class="rule"></div>
         <p style="font-size:10pt;color:#555;">${[d.jobTitle, contact].filter(Boolean).join(" | ")}</p></header>
-        ${summaryHtml}${expHtml}${eduHtml}${skillsHtml}
-        </body></html>`;
+        ${summaryHtml}${expHtml}${eduHtml}${extrasHtml}${skillsHtml}
+                </body></html>`;
 
-    case "T1":
     default: // Classic ATS
       return `<!DOCTYPE html><html><head><style>${BASE_CSS}</style></head><body>
         <header style="margin-bottom:6px;"><h1 style="font-size:18pt;">${esc(d.fullName)}</h1>
         ${d.jobTitle ? `<p style="font-size:11pt;color:#444;">${esc(d.jobTitle)}</p>` : ""}
         <p style="font-size:9.5pt;color:#555;">${contact}</p></header>
-        ${summaryHtml}${expHtml}${eduHtml}${skillsHtml}
+        ${summaryHtml}${expHtml}${eduHtml}${extrasHtml}${skillsHtml}
         </body></html>`;
   }
 }

@@ -6,7 +6,7 @@ import type { CVData } from "@/lib/cv-data";
 import { initialCV } from "@/lib/cv-data";
 import { TemplatePreview } from "./template-preview";
 
-const STEPS = ["Data Diri", "Pengalaman", "Pendidikan & Skill", "Ringkasan", "Template"];
+const STEPS = ["Data Diri", "Pengalaman", "Pendidikan & Skill", "Ringkasan", "Tambahan", "Template"];
 const TEMPLATES = [
   { id: "T1", name: "Classic ATS", desc: "1 kolom · paling aman" },
   { id: "T2", name: "Minimal ATS", desc: "1 kolom · garis tipis" },
@@ -451,8 +451,273 @@ export function Builder() {
         </section>
       )}
 
-      {/* STEP 4: Template */}
+      {/* STEP 4: Tambahan (opsional) */}
       {step === 4 && (
+        <section className="space-y-8">
+          <p className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs leading-relaxed text-amber-800">
+            Semua di langkah ini <strong>opsional</strong>. Isi yang relevan saja,
+            atau langsung tekan Lanjut untuk melewati.
+          </p>
+
+          {/* Sertifikasi */}
+          <div>
+            <h3 className="mb-2 text-sm font-bold">Sertifikasi</h3>
+            {cv.certifications.map((cert, i) => (
+              <div key={i} className="mb-3 rounded-xl border border-zinc-300 p-4">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div>
+                    <label className={labelCls}>Nama sertifikasi</label>
+                    <input className={inputCls} value={cert.name}
+                      onChange={(e) => {
+                        const next = [...cv.certifications];
+                        next[i] = { ...cert, name: e.target.value };
+                        update({ certifications: next });
+                      }} />
+                  </div>
+                  <div>
+                    <label className={labelCls}>Penerbit</label>
+                    <input className={inputCls} value={cert.issuer}
+                      onChange={(e) => {
+                        const next = [...cv.certifications];
+                        next[i] = { ...cert, issuer: e.target.value };
+                        update({ certifications: next });
+                      }} />
+                  </div>
+                  <div>
+                    <label className={labelCls}>Tahun</label>
+                    <input className={inputCls} placeholder="2025" value={cert.year}
+                      onChange={(e) => {
+                        const next = [...cv.certifications];
+                        next[i] = { ...cert, year: e.target.value };
+                        update({ certifications: next });
+                      }} />
+                  </div>
+                </div>
+                <button type="button"
+                  onClick={() => update({ certifications: cv.certifications.filter((_, j) => j !== i) })}
+                  className="mt-3 text-xs text-red-600 hover:underline">
+                  Hapus sertifikasi ini
+                </button>
+              </div>
+            ))}
+            <button type="button"
+              onClick={() => update({ certifications: [...cv.certifications, { name: "", issuer: "", year: "" }] })}
+              className="w-full rounded-full border border-dashed border-zinc-400 py-2.5 text-sm font-semibold text-zinc-600 transition hover:border-emerald-700 hover:text-emerald-700">
+              + Tambah sertifikasi
+            </button>
+          </div>
+
+          {/* Organisasi / Volunteer */}
+          <div>
+            <h3 className="mb-2 text-sm font-bold">Organisasi & Volunteer</h3>
+            {cv.organizations.map((org, i) => (
+              <div key={i} className="mb-3 rounded-xl border border-zinc-300 p-4">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div>
+                    <label className={labelCls}>Nama organisasi</label>
+                    <input className={inputCls} value={org.name}
+                      onChange={(e) => {
+                        const next = [...cv.organizations];
+                        next[i] = { ...org, name: e.target.value };
+                        update({ organizations: next });
+                      }} />
+                  </div>
+                  <div>
+                    <label className={labelCls}>Peran</label>
+                    <input className={inputCls} value={org.role}
+                      onChange={(e) => {
+                        const next = [...cv.organizations];
+                        next[i] = { ...org, role: e.target.value };
+                        update({ organizations: next });
+                      }} />
+                  </div>
+                  <div>
+                    <label className={labelCls}>Mulai</label>
+                    <input className={inputCls} placeholder="2022" value={org.start}
+                      onChange={(e) => {
+                        const next = [...cv.organizations];
+                        next[i] = { ...org, start: e.target.value };
+                        update({ organizations: next });
+                      }} />
+                  </div>
+                  <div>
+                    <label className={labelCls}>Selesai</label>
+                    <input className={inputCls} placeholder="2023 atau sekarang" value={org.end}
+                      onChange={(e) => {
+                        const next = [...cv.organizations];
+                        next[i] = { ...org, end: e.target.value };
+                        update({ organizations: next });
+                      }} />
+                  </div>
+                </div>
+                <div className="mt-3">
+                  <div className="flex items-center justify-between">
+                    <label className={labelCls}>Deskripsi kegiatan</label>
+                    <button type="button" disabled={aiBusy !== null}
+                      onClick={() =>
+                        aiAssist("kegiatan organisasi", org.description, (lines) => {
+                          setCv((prev) => {
+                            const next = [...prev.organizations];
+                            next[i] = { ...next[i], description: String(lines) };
+                            return { ...prev, organizations: next };
+                          });
+                          dirty.current = true;
+                          if (timer.current) clearTimeout(timer.current);
+                          timer.current = setTimeout(() => {
+                            setCv((latest) => { save(latest, templateId); return latest; });
+                          }, 900);
+                        })
+                      }
+                      className="mb-1.5 rounded-full border border-emerald-700 px-3 py-1 text-[11px] font-semibold text-emerald-700 transition hover:bg-emerald-50 disabled:opacity-50">
+                      {aiBusy === "kegiatan organisasi" ? "AI menulis..." : "Bantu tulis dengan AI"}
+                    </button>
+                  </div>
+                  <textarea className={`${inputCls} min-h-20`} value={org.description}
+                    onChange={(e) => {
+                      const next = [...cv.organizations];
+                      next[i] = { ...org, description: e.target.value };
+                      update({ organizations: next });
+                    }} />
+                </div>
+                <button type="button"
+                  onClick={() => update({ organizations: cv.organizations.filter((_, j) => j !== i) })}
+                  className="mt-3 text-xs text-red-600 hover:underline">
+                  Hapus organisasi ini
+                </button>
+              </div>
+            ))}
+            <button type="button"
+              onClick={() => update({ organizations: [...cv.organizations, { name: "", role: "", start: "", end: "", description: "" }] })}
+              className="w-full rounded-full border border-dashed border-zinc-400 py-2.5 text-sm font-semibold text-zinc-600 transition hover:border-emerald-700 hover:text-emerald-700">
+              + Tambah organisasi
+            </button>
+          </div>
+
+          {/* Proyek */}
+          <div>
+            <h3 className="mb-2 text-sm font-bold">Proyek</h3>
+            {cv.projects.map((prj, i) => (
+              <div key={i} className="mb-3 rounded-xl border border-zinc-300 p-4">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div>
+                    <label className={labelCls}>Nama proyek</label>
+                    <input className={inputCls} value={prj.name}
+                      onChange={(e) => {
+                        const next = [...cv.projects];
+                        next[i] = { ...prj, name: e.target.value };
+                        update({ projects: next });
+                      }} />
+                  </div>
+                  <div>
+                    <label className={labelCls}>Peran</label>
+                    <input className={inputCls} value={prj.role}
+                      onChange={(e) => {
+                        const next = [...cv.projects];
+                        next[i] = { ...prj, role: e.target.value };
+                        update({ projects: next });
+                      }} />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className={labelCls}>Link (opsional)</label>
+                    <input className={inputCls} placeholder="https://github.com/... atau tautan portofolio" value={prj.link ?? ""}
+                      onChange={(e) => {
+                        const next = [...cv.projects];
+                        next[i] = { ...prj, link: e.target.value };
+                        update({ projects: next });
+                      }} />
+                  </div>
+                </div>
+                <div className="mt-3">
+                  <div className="flex items-center justify-between">
+                    <label className={labelCls}>Deskripsi</label>
+                    <button type="button" disabled={aiBusy !== null}
+                      onClick={() =>
+                        aiAssist("deskripsi proyek", prj.description, (lines) => {
+                          setCv((prev) => {
+                            const next = [...prev.projects];
+                            next[i] = { ...next[i], description: String(lines) };
+                            return { ...prev, projects: next };
+                          });
+                          dirty.current = true;
+                          if (timer.current) clearTimeout(timer.current);
+                          timer.current = setTimeout(() => {
+                            setCv((latest) => { save(latest, templateId); return latest; });
+                          }, 900);
+                        })
+                      }
+                      className="mb-1.5 rounded-full border border-emerald-700 px-3 py-1 text-[11px] font-semibold text-emerald-700 transition hover:bg-emerald-50 disabled:opacity-50">
+                      {aiBusy === "deskripsi proyek" ? "AI menulis..." : "Bantu tulis dengan AI"}
+                    </button>
+                  </div>
+                  <textarea className={`${inputCls} min-h-20`} value={prj.description}
+                    onChange={(e) => {
+                      const next = [...cv.projects];
+                      next[i] = { ...prj, description: e.target.value };
+                      update({ projects: next });
+                    }} />
+                </div>
+                <button type="button"
+                  onClick={() => update({ projects: cv.projects.filter((_, j) => j !== i) })}
+                  className="mt-3 text-xs text-red-600 hover:underline">
+                  Hapus proyek ini
+                </button>
+              </div>
+            ))}
+            <button type="button"
+              onClick={() => update({ projects: [...cv.projects, { name: "", role: "", description: "" }] })}
+              className="w-full rounded-full border border-dashed border-zinc-400 py-2.5 text-sm font-semibold text-zinc-600 transition hover:border-emerald-700 hover:text-emerald-700">
+              + Tambah proyek
+            </button>
+          </div>
+
+          {/* Bahasa */}
+          <div>
+            <h3 className="mb-2 text-sm font-bold">Bahasa</h3>
+            <div className="space-y-3">
+              {cv.languages.map((lang, i) => (
+                <div key={i} className="flex items-end gap-2">
+                  <div className="flex-1">
+                    <label className={labelCls}>Bahasa</label>
+                    <input className={inputCls} value={lang.name}
+                      onChange={(e) => {
+                        const next = [...cv.languages];
+                        next[i] = { ...lang, name: e.target.value };
+                        update({ languages: next });
+                      }} />
+                  </div>
+                  <div className="w-36">
+                    <label className={labelCls}>Level</label>
+                    <select className={inputCls} value={lang.level}
+                      onChange={(e) => {
+                        const next = [...cv.languages];
+                        next[i] = { ...lang, level: e.target.value };
+                        update({ languages: next });
+                      }}>
+                      <option value="">Pilih</option>
+                      <option>Dasar</option>
+                      <option>Lancar</option>
+                      <option>Native</option>
+                    </select>
+                  </div>
+                  <button type="button" aria-label={`Hapus bahasa ${lang.name || i + 1}`}
+                    onClick={() => update({ languages: cv.languages.filter((_, j) => j !== i) })}
+                    className="mb-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-zinc-300 text-lg text-zinc-500 transition hover:border-red-300 hover:text-red-600 active:scale-95">
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+            <button type="button"
+              onClick={() => update({ languages: [...cv.languages, { name: "", level: "" }] })}
+              className="mt-3 w-full rounded-full border border-dashed border-zinc-400 py-2.5 text-sm font-semibold text-zinc-600 transition hover:border-emerald-700 hover:text-emerald-700">
+              + Tambah bahasa
+            </button>
+          </div>
+        </section>
+      )}
+
+      {/* STEP 5: Template */}
+      {step === 5 && (
         <section>
           <p className={labelCls}>Pilih desain CV</p>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">

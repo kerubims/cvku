@@ -71,6 +71,15 @@ export async function POST(request: Request) {
     });
     const page = await browser.newPage();
     const html = renderCV(data, templateId);
+
+    // Debug mode: return raw HTML for inspection (temporary)
+    const url = new URL(request.url);
+    if (url.searchParams.get("debug") === "html") {
+      return new NextResponse(html, {
+        status: 200,
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+      });
+    }
     await page.setContent(html, { waitUntil: "load" });
     const pdf = await page.pdf({
       format: "A4",

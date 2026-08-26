@@ -1,3 +1,39 @@
+export interface Experience {
+  position: string;
+  company: string;
+  start: string;
+  end: string;
+  description: string;
+}
+
+export interface Education {
+  school: string;
+  degree: string;
+  start: string;
+  end: string;
+}
+
+export interface Certification {
+  name: string;
+  issuer: string;
+  year: string;
+}
+
+export interface Organization {
+  name: string;
+  role: string;
+  start: string;
+  end: string;
+  description: string;
+}
+
+export interface Project {
+  name: string;
+  role: string;
+  description: string;
+  link?: string;
+}
+
 export interface CVData {
   fullName: string;
   jobTitle: string;
@@ -5,20 +41,13 @@ export interface CVData {
   phone: string;
   city: string;
   summary: string;
-  experiences: {
-    position: string;
-    company: string;
-    start: string;
-    end: string;
-    description: string;
-  }[];
-  education: {
-    school: string;
-    degree: string;
-    start: string;
-    end: string;
-  }[];
+  experiences: Experience[];
+  education: Education[];
   skills: string[];
+  certifications: Certification[];
+  organizations: Organization[];
+  projects: Project[];
+  languages: { name: string; level: string }[];
 }
 
 /** Demo data pre-filled in step 1 so users see a "finished" CV immediately. */
@@ -49,6 +78,12 @@ export const DEMO_CV: CVData = {
     },
   ],
   skills: ["Excel", "Input Data", "Arsip Digital", "Google Workspace"],
+  // Step "Tambahan" is optional: demo keeps it empty so users see the skip-friendly
+  // empty state, but the shapes are ready.
+  certifications: [],
+  organizations: [],
+  projects: [],
+  languages: [],
 };
 
 export const EMPTY_CV: CVData = {
@@ -61,6 +96,10 @@ export const EMPTY_CV: CVData = {
   experiences: [],
   education: [],
   skills: [],
+  certifications: [],
+  organizations: [],
+  projects: [],
+  languages: [],
 };
 
 /** Start with demo data; user edits or clears it. */
