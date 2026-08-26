@@ -41,3 +41,22 @@ body {
     transform: translateY(0);
   }
 }
+
+/* Breathing glow on the active step's progress bar */
+@keyframes step-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 4px rgba(5, 150, 105, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 12px rgba(5, 150, 105, 0.75);
+  }
+}
+.step-glow {
+  animation: step-glow 2s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .step-glow {
+    animation: none;
+  }
+}

@@ -40,17 +40,6 @@ export function Builder() {
       })
       .catch(() => {});
   }, []);
-  const [animatingStep, setAnimatingStep] = useState<number | null>(null);
-
-  // Trigger pulse effect when step changes
-  useEffect(() => {
-    if (step !== null) {
-      setAnimatingStep(step);
-      const t = setTimeout(() => setAnimatingStep(null), 600);
-      return () => clearTimeout(t);
-    }
-  }, [step]);
-
 
   const save = useCallback(
     (data: CVData, tpl: string) => {
@@ -130,12 +119,10 @@ export function Builder() {
         <div className="flex items-center justify-between text-xs font-medium text-zinc-500">
           <span>
             Langkah {step + 1} dari {STEPS.length}: {STEPS[step]}
-            {animatingStep !== null && step === animatingStep && (
-              <span
-                className="ml-2 inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500"
-                title="Langkah aktif"
-              />
-            )}
+            <span
+              className="ml-2 inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500"
+              title="Langkah aktif"
+            />
           </span>
           <span
             className={
@@ -157,12 +144,7 @@ export function Builder() {
         </div>
         <div className="mt-2 h-1.5 rounded-full bg-zinc-200">
           <div
-            className={
-              "h-1.5 rounded-full bg-emerald-700 transition-all duration-500 " +
-              (animatingStep !== null && step === animatingStep
-                ? "animate-pulse"
-                : "")
-            }
+            className="step-glow h-1.5 rounded-full bg-emerald-700 transition-all duration-500"
             style={{ width: `${((step + 1) / STEPS.length) * 100}%` }}
           />
         </div>
@@ -802,11 +784,3 @@ export function Builder() {
     </div>
   );
 }
-  // Trigger pulse effect when step changes
-  useEffect(() => {
-    if (step !== null) {
-      setAnimatingStep(step);
-      const t = setTimeout(() => setAnimatingStep(null), 600);
-      return () => clearTimeout(t);
-    }
-  }, [step]);
