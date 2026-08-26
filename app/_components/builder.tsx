@@ -433,8 +433,8 @@ export function Builder() {
         </section>
       )}
 
-      {/* Nav buttons */}
-      <div className="mt-10 flex items-center justify-between">
+      {/* Nav buttons - sticky bottom so always reachable on short screens */}
+      <div className="sticky bottom-0 -mx-4 mt-10 flex items-center justify-between border-t border-zinc-200 bg-zinc-50/95 px-4 py-3 backdrop-blur-sm">
         <button
           type="button"
           onClick={() => setStep((s) => Math.max(0, s - 1))}
