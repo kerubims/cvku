@@ -127,7 +127,14 @@ export async function POST(request: Request) {
     // Clean common markdown bullets
     const lines = out
       .split("\n")
-      .map((l) => l.replace(/^[-*•]\s*/, "").replace(/^\d+[.)]\s*/, "").trim())
+      .map((l) =>
+        l
+          .replace(/\*\*/g, "")   // markdown bold
+          .replace(/(?<!\w)\*(?!\s)([^*]+)\*(?!\w)/g, "$1") // markdown italic
+          .replace(/^[-*•]\s*/, "")
+          .replace(/^\d+[.)]\s*/, "")
+          .trim()
+      )
       .filter(Boolean);
 
     return NextResponse.json({ ok: true, result: lines });

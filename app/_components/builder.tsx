@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import type { CVData } from "@/lib/cv-data";
 import { initialCV } from "@/lib/cv-data";
+import { TemplatePreview } from "./template-preview";
 
 const STEPS = ["Data Diri", "Pengalaman", "Pendidikan & Skill", "Ringkasan", "Template"];
 const TEMPLATES = [
@@ -112,7 +113,7 @@ export function Builder() {
   const labelCls = "block text-xs font-semibold text-zinc-700 mb-1.5";
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 py-10">
+    <div className="mx-auto w-full max-w-3xl px-4 pb-24 pt-10">
       {/* Progress */}
       <div className="mb-8">
         <div className="flex items-center justify-between text-xs font-medium text-zinc-500">
@@ -351,19 +352,64 @@ export function Builder() {
           </button>
 
           <div>
-            <label htmlFor="skills" className={labelCls}>
-              Skill (pisahkan dengan koma)
+            <label htmlFor="skill-input" className={labelCls}>
+              Skill
             </label>
+
+            {/* Capsules */}
+            {cv.skills.length > 0 && (
+              <div className="mb-2 flex flex-wrap gap-2">
+                {cv.skills.map((s, i) => (
+                  <span
+                    key={`${s}-${i}`}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-emerald-700 bg-emerald-50 py-1 pl-3 pr-1.5 text-xs font-semibold text-emerald-800"
+                  >
+                    {s}
+                    <button
+                      type="button"
+                      aria-label={`Hapus skill ${s}`}
+                      onClick={() =>
+                        update({ skills: cv.skills.filter((_, j) => j !== i) })
+                      }
+                      className="flex h-5 w-5 items-center justify-center rounded-full text-emerald-600 transition hover:bg-emerald-200 hover:text-emerald-900 active:scale-90"
+                    >
+                      ×
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {/* Add via input + Enter or comma */}
             <input
-              id="skills"
+              id="skill-input"
               className={inputCls}
-              value={cv.skills.join(", ")}
-              onChange={(e) =>
-                update({
-                  skills: e.target.value.split(",").map((s) => s.trim()).filter(Boolean),
-                })
-              }
+              placeholder="Tulis skill lalu tekan Enter"
+              onKeyDown={(e) => {
+                const val = e.currentTarget.value.trim();
+                if ((e.key === "Enter" || e.key === ",") && val) {
+                  e.preventDefault();
+                  if (!cv.skills.some((s) => s.toLowerCase() === val.toLowerCase())) {
+                    update({ skills: [...cv.skills, val] });
+                  }
+                  e.currentTarget.value = "";
+                } else if (e.key === "Backspace" && !val && cv.skills.length > 0) {
+                  update({ skills: cv.skills.slice(0, -1) });
+                }
+              }}
+              onBlur={(e) => {
+                const val = e.currentTarget.value.trim();
+                if (val) {
+                  if (!cv.skills.some((s) => s.toLowerCase() === val.toLowerCase())) {
+                    update({ skills: [...cv.skills, val] });
+                  }
+                  e.currentTarget.value = "";
+                }
+              }}
             />
+            <p className="mt-1.5 text-xs text-zinc-500">
+              Tekan Enter untuk menambah. Klik tanda × pada capsule untuk menghapus.
+            </p>
           </div>
         </section>
       )}
@@ -418,15 +464,19 @@ export function Builder() {
                   setTemplateId(t.id);
                   save(cv, t.id);
                 }}
-                className={`rounded-xl border-2 p-3 text-left transition active:scale-[0.98] ${
+                className={`overflow-hidden rounded-xl border-2 text-left transition active:scale-[0.98] ${
                   templateId === t.id
-                    ? "border-emerald-700 bg-emerald-50"
-                    : "border-zinc-300 bg-white hover:border-zinc-500"
+                    ? "border-emerald-700 ring-2 ring-emerald-700/20"
+                    : "border-zinc-300 hover:border-zinc-500"
                 }`}
               >
-                <span className="block text-sm font-bold">{t.id}</span>
-                <span className="block text-xs font-semibold mt-0.5">{t.name}</span>
-                <span className="block text-[10px] text-zinc-500 mt-0.5">{t.desc}</span>
+                <span className="block aspect-[210/297] w-full border-b border-zinc-200 bg-white">
+                  <TemplatePreview id={t.id} />
+                </span>
+                <span className="block p-2.5">
+                  <span className="block text-xs font-bold">{t.name}</span>
+                  <span className="block text-[10px] text-zinc-500">{t.desc}</span>
+                </span>
               </button>
             ))}
           </div>
