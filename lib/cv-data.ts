@@ -106,3 +106,59 @@ export const EMPTY_CV: CVData = {
 export function initialCV(): CVData {
   return JSON.parse(JSON.stringify(DEMO_CV));
 }
+
+/**
+ * Make sure every field exists with a safe default, so old/partial drafts
+ * saved before a field was added never crash the UI or the PDF renderer.
+ * (e.g. a resume saved before the "Tambahan" step existed has no
+ * certifications/organizations/projects/languages keys at all.)
+ */
+export function normalizeCV(data: Partial<CVData> | null | undefined): CVData {
+  const src = (data ?? {}) as Record<string, any>;
+  return {
+    ...EMPTY_CV,
+    ...src,
+    experiences: (src.experiences ?? []).map((e: any) => ({
+      position: "",
+      company: "",
+      start: "",
+      end: "",
+      description: "",
+      ...e,
+    })),
+    education: (src.education ?? []).map((e: any) => ({
+      school: "",
+      degree: "",
+      start: "",
+      end: "",
+      ...e,
+    })),
+    skills: Array.isArray(src.skills) ? src.skills : [],
+    certifications: (src.certifications ?? []).map((c: any) => ({
+      name: "",
+      issuer: "",
+      year: "",
+      ...c,
+    })),
+    organizations: (src.organizations ?? []).map((o: any) => ({
+      name: "",
+      role: "",
+      start: "",
+      end: "",
+      description: "",
+      ...o,
+    })),
+    projects: (src.projects ?? []).map((p: any) => ({
+      name: "",
+      role: "",
+      description: "",
+      link: "",
+      ...p,
+    })),
+    languages: (src.languages ?? []).map((l: any) => ({
+      name: "",
+      level: "",
+      ...l,
+    })),
+  };
+}

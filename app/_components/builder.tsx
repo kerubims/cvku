@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback, Fragment } from "react";
 import { useRouter } from "next/navigation";
 import type { CVData } from "@/lib/cv-data";
-import { initialCV } from "@/lib/cv-data";
+import { initialCV, normalizeCV } from "@/lib/cv-data";
 import { TemplatePreview } from "./template-preview";
 
 const STEPS = ["Data Diri", "Pengalaman", "Pendidikan & Skill", "Ringkasan", "Tambahan", "Template"];
@@ -34,7 +34,7 @@ export function Builder() {
       .then((r) => r.json())
       .then((d) => {
         if (d.resume?.data?.fullName) {
-          setCv(d.resume.data);
+          setCv(normalizeCV(d.resume.data));
           if (d.resume.templateId) setTemplateId(d.resume.templateId);
         }
       })

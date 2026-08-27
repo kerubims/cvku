@@ -1,4 +1,5 @@
 import type { CVData } from "./cv-data";
+import { normalizeCV } from "./cv-data";
 
 /**
  * Server-side HTML renderers for each template.
@@ -48,7 +49,7 @@ p, li { font-size:10pt; line-height:1.45; }
 `;
 
 export function renderCV(data: CVData, templateId: string): string {
-  const d = data;
+  const d = normalizeCV(data);
 
   const contact = [d.email, d.phone, d.city].filter(Boolean).map(esc).join(" | ");
   const expHtml =
