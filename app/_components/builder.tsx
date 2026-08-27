@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, Fragment } from "react";
 import { useRouter } from "next/navigation";
 import type { CVData } from "@/lib/cv-data";
 import { initialCV } from "@/lib/cv-data";
@@ -114,15 +114,11 @@ export function Builder() {
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 pb-24 pt-10">
-      {/* Progress */}
+      {/* Progress: step indicator ala Michelin */}
       <div className="mb-8">
-        <div className="flex items-center justify-between text-xs font-medium text-zinc-500">
+        <div className="mb-4 flex items-center justify-between text-[11px] font-medium text-zinc-500">
           <span>
-            Langkah {step + 1} dari {STEPS.length}: {STEPS[step]}
-            <span
-              className="ml-2 inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500"
-              title="Langkah aktif"
-            />
+            Langkah {step + 1} dari {STEPS.length}
           </span>
           <span
             className={
@@ -142,11 +138,61 @@ export function Builder() {
                   : ""}
           </span>
         </div>
-        <div className="mt-2 h-1.5 rounded-full bg-zinc-200">
-          <div
-            className="step-glow h-1.5 rounded-full bg-emerald-700 transition-all duration-500"
-            style={{ width: `${((step + 1) / STEPS.length) * 100}%` }}
-          />
+        <div className="flex items-start">
+          {STEPS.map((label, i) => {
+            const done = i < step;
+            const active = i === step;
+            return (
+              <Fragment key={label}>
+                {i > 0 && (
+                  <div
+                    className={`mt-[13px] h-0.5 w-3 flex-1 rounded-full transition-colors duration-500 sm:w-6 ${
+                      i <= step ? "bg-emerald-600" : "bg-zinc-200"
+                    }`}
+                  />
+                )}
+                <div className="flex flex-1 flex-col items-center">
+                  <div className="relative">
+                    {active && (
+                      <span className="absolute -inset-1.5 animate-ping rounded-full bg-emerald-400/50" />
+                    )}
+                    <div
+                      className={`relative flex h-7 w-7 items-center justify-center rounded-full border-2 text-xs font-bold transition-all duration-300 sm:h-8 sm:w-8 ${
+                        done
+                          ? "border-emerald-600 bg-emerald-600 text-white"
+                          : active
+                            ? "border-emerald-600 bg-emerald-600 text-white shadow-[0_0_12px_rgba(5,150,105,0.7)]"
+                            : "border-zinc-300 bg-white text-zinc-400"
+                      }`}
+                    >
+                      {done ? (
+                        <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5">
+                          <path
+                            fillRule="evenodd"
+                            d="M16.7 5.3a1 1 0 0 1 0 1.4l-7.5 7.5a1 1 0 0 1-1.4 0L3.3 9.7a1 1 0 0 1 1.4-1.4l3.8 3.8 6.8-6.8a1 1 0 0 1 1.4 0Z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      ) : (
+                        i + 1
+                      )}
+                    </div>
+                  </div>
+                  <span
+                    className={`mt-1.5 text-center text-[9px] font-medium leading-tight sm:text-[10px] ${
+                      active
+                        ? "text-emerald-700"
+                        : done
+                          ? "text-zinc-600"
+                          : "text-zinc-400"
+                    }`}
+                  >
+                    {label}
+                  </span>
+                </div>
+              </Fragment>
+            );
+          })}
         </div>
       </div>
 

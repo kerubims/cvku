@@ -77,15 +77,15 @@ export async function POST(request: Request) {
     let out = "";
     try {
       const res = await fetch(
-        `${process.env.OMNIROUTE_BASE_URL}/chat/completions`,
+        "https://api.novita.ai/openai/v1/chat/completions",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${process.env.OMNIROUTE_API_KEY}`,
+            Authorization: `Bearer ${process.env.NOVITA_API_KEY}`,
           },
           body: JSON.stringify({
-            model: process.env.OMNIROUTE_MODEL,
+            model: "meta-llama/llama-3.1-8b-instruct",
             messages: [
               { role: "system", content: system },
               {
@@ -131,8 +131,8 @@ export async function POST(request: Request) {
         l
           .replace(/\*\*/g, "")   // markdown bold
           .replace(/(?<!\w)\*(?!\s)([^*]+)\*(?!\w)/g, "$1") // markdown italic
-          .replace(/^[-*•]\s*/, "")
-          .replace(/^\d+[.)]\s*/, "")
+          .replace(/^[-*•]\s/, "")
+          .replace(/^\d+[.)]\s/, "")
           .trim()
       )
       .filter(Boolean);
