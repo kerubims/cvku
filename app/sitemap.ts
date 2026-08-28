@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { CONTOH_CV_LIST } from "@/lib/contoh-cv/data";
 
-const BASE = "https://cv.ksm.web.id";
+const BASE = "https://cvku.ksm.web.id";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
