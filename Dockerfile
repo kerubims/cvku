@@ -61,6 +61,8 @@ COPY --from=build --chown=cvku:cvku /app/.next ./.next
 COPY --from=build --chown=cvku:cvku /app/node_modules ./node_modules
 COPY --from=build --chown=cvku:cvku /app/package.json ./package.json
 COPY --from=build --chown=cvku:cvku /app/next.config.ts ./next.config.ts
+# Operational scripts (seed-admin, future migrations) — needed for one-off `docker compose exec`
+COPY --from=build --chown=cvku:cvku /app/scripts ./scripts
 
 # Puppeteer cache dir (matches .puppeteerrc.cjs -> .chrome)
 RUN mkdir -p /app/.chrome && chown -R cvku:cvku /app/.chrome
