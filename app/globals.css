@@ -41,3 +41,21 @@ body {
     transform: translateY(0);
   }
 }
+
+/* Print: route /full/* tampil bersih, sembunyikan nav & button */
+@media print {
+  header,
+  footer,
+  nav,
+  button,
+  [role="dialog"],
+  [aria-label="Tutup"] {
+    display: none !important;
+  }
+  body {
+    background: white !important;
+  }
+  .fixed {
+    position: static !important;
+  }
+}

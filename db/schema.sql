@@ -56,5 +56,19 @@ CREATE TABLE IF NOT EXISTS ai_usage (
   created_at timestamptz NOT NULL DEFAULT now()
 );
 
+-- Feedback dari user (form di pojok kanan bawah)
+CREATE TABLE IF NOT EXISTS feedback (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  email text NOT NULL,
+  message text NOT NULL,
+  page_url text,
+  user_agent text,
+  ip inet,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  is_read boolean NOT NULL DEFAULT false
+);
+
 CREATE INDEX IF NOT EXISTS idx_resumes_session ON resumes(session_id);
 CREATE INDEX IF NOT EXISTS idx_ai_usage_session_daily ON ai_usage(session_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_feedback_created_at ON feedback(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_feedback_is_read ON feedback(is_read, created_at DESC);

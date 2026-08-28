@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ORG_SCHEMA, SOFTWARE_SCHEMA, SITE_URL } from "@/lib/seo/schemas";
 import { JsonLd } from "@/components/json-ld";
+import { FeedbackWidget } from "@/components/feedback-widget";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -56,6 +57,7 @@ export default function RootLayout({
       <body className="min-h-[100dvh] flex flex-col bg-zinc-50 text-zinc-900">
         <JsonLd data={[ORG_SCHEMA, SOFTWARE_SCHEMA]} />
         {children}
+        <FeedbackWidget />
       </body>
     </html>
   );

@@ -2,6 +2,8 @@ import { Pool } from "pg";
 import Link from "next/link";
 import { WaitlistForm } from "./_components/waitlist-form";
 import { RevealObserver } from "./_components/reveal-observer";
+import { FaqAccordion } from "@/components/faq-accordion";
+import { FAQS } from "@/lib/seo/schemas";
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -185,6 +187,22 @@ export default async function LandingPage() {
             </li>
           ))}
         </ol>
+      </section>
+
+      {/* FAQ */}
+      <section className="border-y border-zinc-200 bg-white">
+        <div className="mx-auto w-full max-w-3xl px-4 py-20">
+          <h2 className="text-2xl font-bold tracking-tight md:text-3xl">
+            Pertanyaan yang sering ditanya
+          </h2>
+          <p className="mt-3 max-w-[60ch] text-sm leading-relaxed text-zinc-600">
+            Belum menemukan jawabannya? Kirim feedback lewat tombol di pojok
+            kanan bawah — kami baca semua.
+          </p>
+          <div className="mt-8">
+            <FaqAccordion items={FAQS} groupId="landing-faq" />
+          </div>
+        </div>
       </section>
 
       {/* Bottom CTA band */}

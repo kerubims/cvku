@@ -12,6 +12,8 @@ import {
   breadcrumbSchema,
 } from "@/lib/seo/schemas";
 import { JsonLd } from "@/components/json-ld";
+import { CvDocument } from "@/components/cv-document";
+import { FullscreenButton } from "@/components/fullscreen-button";
 
 export const dynamicParams = false;
 
@@ -128,84 +130,27 @@ export default async function ContohCVDetail({
 
         {/* CV display — text-selectable, ATS-pure */}
         <section className="mb-10">
-          <h2 className="text-xl font-bold text-zinc-900 mb-4">
-            Contoh CV Lengkap
-          </h2>
-          <div className="rounded-2xl bg-white border border-zinc-200 p-8 shadow-sm font-sans">
-            <header className="border-b-2 border-zinc-900 pb-3 mb-4">
-              <h3 className="text-2xl font-bold uppercase tracking-wide text-zinc-900">
-                {cv.cv.nama}
-              </h3>
-              <p className="text-base text-zinc-700 mt-1">{cv.cv.jabatan}</p>
-              <p className="text-sm text-zinc-500 mt-1">
-                {cv.cv.email} · {cv.cv.telepon} · {cv.cv.kota}
-              </p>
-            </header>
-
-            <div className="mb-4">
-              <h4 className="text-sm font-bold uppercase tracking-wider text-zinc-900 border-b border-zinc-300 pb-1 mb-2">
-                Ringkasan
-              </h4>
-              <p className="text-sm text-zinc-700 leading-relaxed">
-                {cv.cv.ringkasan}
-              </p>
+          <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+            <h2 className="text-xl font-bold text-zinc-900">
+              Contoh CV Lengkap
+            </h2>
+            <div className="flex flex-wrap items-center gap-2 text-sm">
+              <FullscreenButton targetId={`cv-document-${cv.slug}`} />
+              <a
+                href={`/contoh-cv/${cv.slug}/full`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-md border border-zinc-300 bg-white px-3 py-1.5 font-medium text-zinc-700 transition-colors hover:bg-zinc-50"
+                title="Buka di tab baru (view bersih tanpa navigasi)"
+              >
+                <svg width="14" height="14" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                  <path d="M11 3h6v6M17 3l-8 8M14 11v6H4V7h6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                Open in new tab
+              </a>
             </div>
-
-            <div className="mb-4">
-              <h4 className="text-sm font-bold uppercase tracking-wider text-zinc-900 border-b border-zinc-300 pb-1 mb-2">
-                Pengalaman
-              </h4>
-              {cv.cv.pengalaman.map((p, i) => (
-                <div key={i} className="mb-3">
-                  <div className="flex justify-between items-baseline">
-                    <p className="font-semibold text-zinc-900">
-                      {p.posisi} — {p.perusahaan}
-                    </p>
-                    <p className="text-xs text-zinc-500">
-                      {p.mulai} – {p.selesai}
-                    </p>
-                  </div>
-                  <ul className="list-disc list-outside ml-5 mt-1 text-sm text-zinc-700 space-y-0.5">
-                    {p.deskripsi.map((d, j) => (
-                      <li key={j}>{d}</li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-
-            <div className="mb-4">
-              <h4 className="text-sm font-bold uppercase tracking-wider text-zinc-900 border-b border-zinc-300 pb-1 mb-2">
-                Pendidikan
-              </h4>
-              {cv.cv.pendidikan.map((p, i) => (
-                <div key={i} className="flex justify-between items-baseline mb-1">
-                  <p className="font-semibold text-zinc-900">
-                    {p.sekolah} — {p.jurusan}
-                  </p>
-                  <p className="text-xs text-zinc-500">
-                    {p.mulai} – {p.selesai}
-                  </p>
-                </div>
-              ))}
-            </div>
-
-            <div className="mb-4">
-              <h4 className="text-sm font-bold uppercase tracking-wider text-zinc-900 border-b border-zinc-300 pb-1 mb-2">
-                Skill
-              </h4>
-              <p className="text-sm text-zinc-700">{cv.cv.skill.join(" · ")}</p>
-            </div>
-
-            {cv.cv.tambahan?.map((t, i) => (
-              <div key={i} className="mb-2">
-                <h4 className="text-sm font-bold uppercase tracking-wider text-zinc-900 border-b border-zinc-300 pb-1 mb-2">
-                  {t.judul}
-                </h4>
-                <p className="text-sm text-zinc-700">{t.isi}</p>
-              </div>
-            ))}
           </div>
+          <CvDocument cv={cv} />
           <p className="text-xs text-zinc-500 mt-2">
             *CV di atas adalah teks selectable, sama dengan format PDF ATS yang bisa
             di-scan sistem. Klik{' '}

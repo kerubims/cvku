@@ -3,6 +3,7 @@ import Link from "next/link";
 import { CONTOH_CV_LIST } from "@/lib/contoh-cv/data";
 import { FAQS, SITE_URL, SOFTWARE_SCHEMA, ORG_SCHEMA } from "@/lib/seo/schemas";
 import { JsonLd } from "@/components/json-ld";
+import { FaqAccordion } from "@/components/faq-accordion";
 
 export const metadata = {
   title: "Contoh CV per Lowongan — Template Lolos ATS 2026",
@@ -95,14 +96,7 @@ export default function ContohCVIndex() {
 
       <section className="mt-16 rounded-2xl bg-zinc-50 p-8 border border-zinc-200">
         <h2 className="text-2xl font-bold text-zinc-900 mb-6">Pertanyaan Umum</h2>
-        <div className="space-y-6">
-          {FAQS.map((f) => (
-            <div key={f.question}>
-              <h3 className="font-semibold text-zinc-900">{f.question}</h3>
-              <p className="mt-2 text-zinc-700">{f.answer}</p>
-            </div>
-          ))}
-        </div>
+        <FaqAccordion items={FAQS} groupId="contoh-faq" />
       </section>
 
       <section className="mt-12 text-center">
