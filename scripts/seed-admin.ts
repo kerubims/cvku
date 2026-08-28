@@ -55,23 +55,41 @@ async function main() {
 
   const role = "superadmin"; // First user = superadmin (bisa tambah admin lain nanti)
 
-  const result = await pool.query<{ id: string; email: string; name: string; role: string }>(
-    `INSERT INTO admins (email, password_hash, name, role, is_active, failed_attempts, locked_until)
-     VALUES ($1, $2, $3, $4, true, 0, NULL)
-     ON CONFLICT (lower(email)) DO UPDATE
-       SET password_hash = EXCLUDED.password_hash,
-           name = EXCLUDED.name,
-           role = EXCLUDED.role,
-           is_active = true,
-           failed_attempts = 0,
-           locked_until = NULL,
-           updated_at = now()
-     RETURNING id, email, name, role`,
-    [email, passwordHash, name, role]
+  // Idempotent upsert: cek dulu existing by email (case-insensitive),
+  // lalu INSERT atau UPDATE. Lebih reliable dari ON CONFLICT dengan expression index.
+  const existing = await pool.query<{ id: string }>(
+    `SELECT id FROM admins WHERE lower(email) = $1 LIMIT 1`,
+    [email]
   );
 
-  const row = result.rows[0];
-  console.log(`[seed-admin] OK — id=${row.id} email=${row.email} name="${row.name}" role=${row.role}`);
+  let row: { id: string; email: string; name: string; role: string };
+  if (existing.rowCount && existing.rowCount > 0) {
+    const upd = await pool.query<{ id: string; email: string; name: string; role: string }>(
+      `UPDATE admins
+         SET password_hash = $2,
+             name = $3,
+             role = $4,
+             is_active = true,
+             failed_attempts = 0,
+             locked_until = NULL,
+             updated_at = now()
+       WHERE lower(email) = $1
+       RETURNING id, email, name, role`,
+      [email, passwordHash, name, role]
+    );
+    row = upd.rows[0];
+    console.log(`[seed-admin] OK updated existing admin — id=${row.id} email=${row.email}`);
+  } else {
+    const ins = await pool.query<{ id: string; email: string; name: string; role: string }>(
+      `INSERT INTO admins (email, password_hash, name, role, is_active, failed_attempts, locked_until)
+         VALUES ($1, $2, $3, $4, true, 0, NULL)
+       RETURNING id, email, name, role`,
+      [email, passwordHash, name, role]
+    );
+    row = ins.rows[0];
+    console.log(`[seed-admin] OK created new admin — id=${row.id} email=${row.email}`);
+  }
+  console.log(`[seed-admin] name="${row.name}" role=${row.role}`);
 
   await pool.end();
 }
