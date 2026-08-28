@@ -1,0 +1,38 @@
+# Don't send heavy / dev-only files to Docker build context
+
+# git / github
+.git
+.gitignore
+.github
+
+# local env
+.env
+.env.local
+.env*.local
+db/.env
+
+# dependencies
+node_modules
+
+# next build outputs (we re-build inside container)
+.next
+out
+
+# editor / OS
+.vscode
+.idea
+.DS_Store
+*.swp
+*.swo
+
+# logs
+*.log
+npm-debug.log*
+
+# this Dockerfile context
+Dockerfile
+docker-compose*.yml
+docker-compose*.yaml
+
+# puppeteer cache
+.chrome

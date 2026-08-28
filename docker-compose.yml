@@ -1,0 +1,59 @@
+# CVKu - production stack
+# Web: 9013:3000 (LAN-accessible)
+# DB:  127.0.0.1:9014:5432 (localhost only - host can psql, LAN cannot scan)
+# Build context: repo root (uses ./Dockerfile)
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: cvku-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-cvku}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required - set in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-cvku}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      # Init SQL runs only on first startup when /var/lib/postgresql/data is empty
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    # Bind to loopback only - host machine can psql, but LAN/internet cannot scan
+    ports:
+      - "127.0.0.1:9014:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-cvku} -d ${POSTGRES_DB:-cvku}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - cvku-net
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cvku-web
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      # Inside compose network, db is reachable as hostname "db"
+      DATABASE_URL: postgresql://${POSTGRES_USER:-cvku}:${POSTGRES_PASSWORD:?required}@db:5432/${POSTGRES_DB:-cvku}
+      NOVITA_API_KEY: ${NOVITA_API_KEY:?NOVITA_API_KEY required - set in .env}
+      # Tighter cookie/CORS if needed later:
+      # ALLOWED_DEV_ORIGINS: "192.168.1.86"
+    ports:
+      - "9013:3000"
+    networks:
+      - cvku-net
+
+volumes:
+  pgdata:
+    name: cvku_pgdata
+
+networks:
+  cvku-net:
+    name: cvku-net
+    driver: bridge
