@@ -44,6 +44,10 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  // Performance: hint browser untuk preconnect/dns-prefetch ke origin (mempercepat TTFB)
+  other: {
+    "theme-color": "#064e3b",
+  },
 };
 
 export default function RootLayout({
@@ -54,6 +58,11 @@ export default function RootLayout({
       lang="id"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
+      <head>
+        {/* Performance: hint browser untuk open koneksi ke origin & Cloudflare lebih awal */}
+        <link rel="preconnect" href="https://cvku.ksm.web.id" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://cvku.ksm.web.id" />
+      </head>
       <body className="min-h-[100dvh] flex flex-col bg-zinc-50 text-zinc-900">
         <JsonLd data={[ORG_SCHEMA, SOFTWARE_SCHEMA]} />
         {children}
