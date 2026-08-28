@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import type { CVData } from "@/lib/cv-data";
 import { initialCV, normalizeCV } from "@/lib/cv-data";
 import { TemplatePreview } from "./template-preview";
+import { TailorSection } from "./tailor-section";
 
 const STEPS = ["Data Diri", "Pengalaman", "Pendidikan & Skill", "Ringkasan", "Tambahan", "Template"];
 const TEMPLATES = [
@@ -504,6 +505,7 @@ export function Builder() {
       {/* STEP 4: Tambahan (opsional) */}
       {step === 4 && (
         <section className="space-y-8">
+          <TailorSection cv={cv} update={update} save={save} />
           <p className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs leading-relaxed text-amber-800">
             Semua di langkah ini <strong>opsional</strong>. Isi yang relevan saja,
             atau langsung tekan Lanjut untuk melewati.
