@@ -1,4 +1,5 @@
 import { Pool } from "pg";
+import Link from "next/link";
 import { WaitlistForm } from "./_components/waitlist-form";
 import { RevealObserver } from "./_components/reveal-observer";
 
@@ -203,9 +204,13 @@ export default async function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-8 text-xs text-zinc-400">
+      <footer className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-8 text-xs text-zinc-500">
         <span>CVKu. Dibuat di Indonesia.</span>
-        <span>Rilis 2026</span>
+        <nav className="flex gap-4">
+          <Link href="/contoh-cv" className="hover:text-zinc-900">Contoh CV</Link>
+          <Link href="/privasi" className="hover:text-zinc-900">Privasi</Link>
+          <span>Rilis 2026</span>
+        </nav>
       </footer>
     </main>
   );

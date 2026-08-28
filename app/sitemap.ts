@@ -11,6 +11,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency: "weekly" as const,
     priority: 1.0,
   };
+  const privasi = {
+    url: `${BASE}/privasi`,
+    lastModified: now,
+    changeFrequency: "yearly" as const,
+    priority: 0.3,
+  };
   const contohHub = {
     url: `${BASE}/contoh-cv`,
     lastModified: now,
@@ -23,5 +29,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency: "monthly" as const,
     priority: 0.8,
   }));
-  return [landing, contohHub, ...contoh];
+  return [landing, contohHub, privasi, ...contoh];
 }
