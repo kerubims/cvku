@@ -43,6 +43,11 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER:-cvku}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-cvku}
       NOVITA_API_KEY: ${NOVITA_API_KEY:?NOVITA_API_KEY required - set in .env}
       ADMIN_TOKEN: ${ADMIN_TOKEN:?ADMIN_TOKEN required - set in .env}
+      # iron-session secret (32+ char random). Generate:
+      #   openssl rand -base64 32
+      IRON_SESSION_PASSWORD: ${IRON_SESSION_PASSWORD:?IRON_SESSION_PASSWORD required - set in .env}
+      # Public base URL (auto-detected from request headers if unset)
+      # AUTH_BASE_URL: https://cvku.ksm.web.id
       # Tighter cookie/CORS if needed later:
       # ALLOWED_DEV_ORIGINS: "192.168.1.86"
     ports:

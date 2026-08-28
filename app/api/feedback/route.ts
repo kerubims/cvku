@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { Pool } from "pg";
+import { AuthError, requireAdmin } from "@/lib/auth";
+import { getClientIp } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -14,32 +16,7 @@ const MAX_MSG = 2000;
 const MIN_EMAIL = 5;
 const MAX_EMAIL = 254;
 
-// Simple IP extractor (works behind Cloudflare / proxy)
-function getClientIp(req: Request): string | null {
-  const cf = req.headers.get("cf-connecting-ip");
-  if (cf) return cf;
-  const xff = req.headers.get("x-forwarded-for");
-  if (xff) return xff.split(",")[0].trim();
-  return null;
-}
-
-function isAuthorized(req: Request): boolean {
-  const token = process.env.ADMIN_TOKEN;
-  // Fail-closed: if no token set, no one can read
-  if (!token) return false;
-  const auth = req.headers.get("authorization") ?? "";
-  // Accept "Bearer xxx" or raw token
-  const provided = auth.startsWith("Bearer ") ? auth.slice(7) : auth;
-  // Constant-time compare
-  if (provided.length !== token.length) return false;
-  let mismatch = 0;
-  for (let i = 0; i < provided.length; i++) {
-    mismatch |= provided.charCodeAt(i) ^ token.charCodeAt(i);
-  }
-  return mismatch === 0;
-}
-
-/** POST — public submit */
+/** POST — public submit (no auth) */
 export async function POST(request: Request) {
   let body: { email?: string; message?: string; pageUrl?: string };
   try {
@@ -48,98 +25,108 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Request tidak valid." }, { status: 400 });
   }
 
-  const email = (body.email ?? "").trim().toLowerCase();
+  const email = (body.email ?? "").trim();
   const message = (body.message ?? "").trim();
   const pageUrl = (body.pageUrl ?? "").trim().slice(0, 500) || null;
-  const userAgent = request.headers.get("user-agent")?.slice(0, 500) ?? null;
-  const ip = getClientIp(request);
 
-  if (email.length < MIN_EMAIL || email.length > MAX_EMAIL || !EMAIL_RE.test(email)) {
+  if (email.length < MIN_EMAIL || email.length > MAX_EMAIL) {
+    return NextResponse.json(
+      { error: "Email harus 5–254 karakter." },
+      { status: 400 }
+    );
+  }
+  if (!EMAIL_RE.test(email)) {
     return NextResponse.json(
       { error: "Format email tidak valid." },
       { status: 400 }
     );
   }
-  if (message.length < MIN_MSG) {
+  if (message.length < MIN_MSG || message.length > MAX_MSG) {
     return NextResponse.json(
-      { error: `Feedback minimal ${MIN_MSG} karakter.` },
-      { status: 400 }
-    );
-  }
-  if (message.length > MAX_MSG) {
-    return NextResponse.json(
-      { error: `Feedback maksimal ${MAX_MSG} karakter.` },
+      { error: `Feedback harus ${MIN_MSG}–${MAX_MSG} karakter.` },
       { status: 400 }
     );
   }
 
+  const userAgent = request.headers.get("user-agent")?.slice(0, 500) || null;
+  const ip = getClientIp(request);
+
   try {
-    await pool.query(
+    const result = await pool.query(
       `INSERT INTO feedback (email, message, page_url, user_agent, ip)
-       VALUES ($1, $2, $3, $4, $5::inet)`,
+       VALUES ($1, $2, $3, $4, $5)
+       RETURNING id, created_at`,
       [email, message, pageUrl, userAgent, ip]
     );
     return NextResponse.json({
       ok: true,
+      id: result.rows[0].id,
       message: "Terima kasih! Feedback kamu sudah kami terima.",
     });
   } catch (err) {
-    console.error("[feedback POST] DB error:", err);
+    console.error("[/api/feedback POST] error:", err);
     return NextResponse.json(
-      { error: "Gagal menyimpan. Coba lagi sebentar." },
+      { error: "Gagal menyimpan feedback. Coba lagi nanti." },
       { status: 500 }
     );
   }
 }
 
-/** GET — admin only, list feedback (newest first) */
+/** GET — admin only, list feedback */
 export async function GET(request: Request) {
-  if (!isAuthorized(request)) {
-    return NextResponse.json(
-      { error: "Unauthorized. Butuh header Authorization: Bearer <ADMIN_TOKEN>." },
-      { status: 401 }
-    );
+  try {
+    await requireAdmin();
+  } catch (err) {
+    if (err instanceof AuthError) {
+      return NextResponse.json({ error: err.message }, { status: 401 });
+    }
+    throw err;
   }
 
   const url = new URL(request.url);
-  const limit = Math.min(parseInt(url.searchParams.get("limit") ?? "100", 10) || 100, 500);
-  const offset = Math.max(parseInt(url.searchParams.get("offset") ?? "0", 10) || 0, 0);
+  const limit = Math.min(parseInt(url.searchParams.get("limit") ?? "50", 10) || 50, 200);
   const onlyUnread = url.searchParams.get("unread") === "1";
 
+  const where = onlyUnread ? "WHERE is_read = false" : "";
+
   try {
-    const params: unknown[] = [];
-    let where = "";
-    if (onlyUnread) {
-      where = "WHERE is_read = false";
-    }
-    params.push(limit, offset);
-    const r = await pool.query(
+    const items = await pool.query(
       `SELECT id, email, message, page_url, user_agent, ip, created_at, is_read
        FROM feedback
        ${where}
        ORDER BY created_at DESC
-       LIMIT $1 OFFSET $2`,
-      params
+       LIMIT $1`,
+      [limit]
     );
-    const total = await pool.query(
-      `SELECT count(*)::int AS n, count(*) FILTER (WHERE is_read = false)::int AS unread FROM feedback`
+    const counts = await pool.query(
+      `SELECT count(*)::int AS total,
+              count(*) FILTER (WHERE is_read = false)::int AS unread
+       FROM feedback`
     );
     return NextResponse.json({
       ok: true,
-      total: total.rows[0].n,
-      unread: total.rows[0].unread,
-      items: r.rows,
+      total: counts.rows[0].total,
+      unread: counts.rows[0].unread,
+      items: items.rows,
     });
   } catch (err) {
-    console.error("[feedback GET] DB error:", err);
-    return NextResponse.json({ error: "DB error" }, { status: 500 });
+    console.error("[/api/feedback GET] error:", err);
+    return NextResponse.json(
+      { error: "Gagal membaca feedback." },
+      { status: 500 }
+    );
   }
 }
 
 /** PATCH — admin only, mark as read/unread */
 export async function PATCH(request: Request) {
-  if (!isAuthorized(request)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  try {
+    await requireAdmin();
+  } catch (err) {
+    if (err instanceof AuthError) {
+      return NextResponse.json({ error: err.message }, { status: 401 });
+    }
+    throw err;
   }
 
   let body: { id?: string; is_read?: boolean };
@@ -148,24 +135,69 @@ export async function PATCH(request: Request) {
   } catch {
     return NextResponse.json({ error: "Request tidak valid." }, { status: 400 });
   }
-  if (!body.id || typeof body.is_read !== "boolean") {
-    return NextResponse.json(
-      { error: "Butuh field id dan is_read." },
-      { status: 400 }
+
+  const id = body.id;
+  if (!id || typeof id !== "string") {
+    return NextResponse.json({ error: "id wajib." }, { status: 400 });
+  }
+  const isRead = body.is_read !== false; // default true
+
+  try {
+    const result = await pool.query(
+      `UPDATE feedback SET is_read = $1 WHERE id = $2 RETURNING id, is_read`,
+      [isRead, id]
     );
+    if (result.rowCount === 0) {
+      return NextResponse.json(
+        { error: "Feedback tidak ditemukan." },
+        { status: 404 }
+      );
+    }
+    return NextResponse.json({
+      ok: true,
+      id: result.rows[0].id,
+      is_read: result.rows[0].is_read,
+    });
+  } catch (err) {
+    console.error("[/api/feedback PATCH] error:", err);
+    return NextResponse.json(
+      { error: "Gagal update feedback." },
+      { status: 500 }
+    );
+  }
+}
+
+/** DELETE — admin only, hapus 1 feedback (untuk moderation) */
+export async function DELETE(request: Request) {
+  try {
+    await requireAdmin();
+  } catch (err) {
+    if (err instanceof AuthError) {
+      return NextResponse.json({ error: err.message }, { status: 401 });
+    }
+    throw err;
+  }
+
+  const url = new URL(request.url);
+  const id = url.searchParams.get("id");
+  if (!id) {
+    return NextResponse.json({ error: "id wajib di query." }, { status: 400 });
   }
 
   try {
-    const r = await pool.query(
-      `UPDATE feedback SET is_read = $1 WHERE id = $2 RETURNING id, is_read`,
-      [body.is_read, body.id]
-    );
-    if (r.rowCount === 0) {
-      return NextResponse.json({ error: "ID tidak ditemukan." }, { status: 404 });
+    const result = await pool.query(`DELETE FROM feedback WHERE id = $1`, [id]);
+    if (result.rowCount === 0) {
+      return NextResponse.json(
+        { error: "Feedback tidak ditemukan." },
+        { status: 404 }
+      );
     }
-    return NextResponse.json({ ok: true, id: r.rows[0].id, is_read: r.rows[0].is_read });
+    return NextResponse.json({ ok: true, id });
   } catch (err) {
-    console.error("[feedback PATCH] DB error:", err);
-    return NextResponse.json({ error: "DB error" }, { status: 500 });
+    console.error("[/api/feedback DELETE] error:", err);
+    return NextResponse.json(
+      { error: "Gagal hapus feedback." },
+      { status: 500 }
+    );
   }
 }

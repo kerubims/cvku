@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useTransition } from "react";
+import { useRouter } from "next/navigation";
 
 type FeedbackItem = {
   id: string;
@@ -20,240 +21,214 @@ type ListResponse = {
   items: FeedbackItem[];
 };
 
-const TOKEN_KEY = "cvku_admin_token";
-
 export function FeedbackAdminClient() {
-  const [token, setToken] = useState<string | null>(null);
-  const [tokenInput, setTokenInput] = useState("");
+  const router = useRouter();
   const [data, setData] = useState<ListResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [onlyUnread, setOnlyUnread] = useState(false);
-
-  // Load token dari localStorage
-  useEffect(() => {
-    const saved = localStorage.getItem(TOKEN_KEY);
-    if (saved) setToken(saved);
-  }, []);
+  const [, startSignOut] = useTransition();
 
   const fetchList = useCallback(async () => {
-    if (!token) return;
     setLoading(true);
     setError(null);
     try {
       const r = await fetch(
         `/api/feedback?limit=200${onlyUnread ? "&unread=1" : ""}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { credentials: "include" } // Kirim session cookie
       );
       if (r.status === 401) {
-        localStorage.removeItem(TOKEN_KEY);
-        setToken(null);
-        setError("Token salah atau kadaluarsa. Masukkan ulang.");
+        // Session expired — back to login
+        router.push("/admin/login");
         return;
       }
-      const json = (await r.json()) as ListResponse | { error: string };
-      if ("error" in json) {
-        setError(json.error);
+      const json: ListResponse = await r.json();
+      if (!json.ok) {
+        setError("Gagal memuat feedback.");
         return;
       }
       setData(json);
-    } catch {
-      setError("Gagal terhubung ke server.");
+    } catch (err) {
+      console.error(err);
+      setError("Gagal memuat feedback (network error).");
     } finally {
       setLoading(false);
     }
-  }, [token, onlyUnread]);
+  }, [onlyUnread, router]);
 
-  // Auto-refresh
+  // Auto-fetch + auto-refresh tiap 30 detik
   useEffect(() => {
-    if (!token) return;
-    fetchList();
-    const id = setInterval(fetchList, 30_000);
+    void fetchList();
+    const id = setInterval(() => void fetchList(), 30_000);
     return () => clearInterval(id);
-  }, [token, onlyUnread, fetchList]);
+  }, [fetchList]);
 
-  async function toggleRead(id: string, is_read: boolean) {
-    if (!token) return;
+  async function toggleRead(id: string, current: boolean) {
     try {
       await fetch("/api/feedback", {
         method: "PATCH",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ id, is_read }),
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, is_read: !current }),
       });
-      fetchList();
-    } catch {
-      // ignore
+      void fetchList();
+    } catch (err) {
+      console.error("PATCH failed:", err);
     }
   }
 
-  function saveToken(e: React.FormEvent) {
-    e.preventDefault();
-    const t = tokenInput.trim();
-    if (!t) return;
-    localStorage.setItem(TOKEN_KEY, t);
-    setToken(t);
-    setTokenInput("");
+  async function deleteItem(id: string) {
+    if (!confirm("Hapus feedback ini secara permanen?")) return;
+    try {
+      await fetch(`/api/feedback?id=${encodeURIComponent(id)}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      void fetchList();
+    } catch (err) {
+      console.error("DELETE failed:", err);
+    }
   }
 
-  function logout() {
-    localStorage.removeItem(TOKEN_KEY);
-    setToken(null);
-    setData(null);
-  }
-
-  if (!token) {
-    return (
-      <form
-        onSubmit={saveToken}
-        className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm"
-      >
-        <h2 className="text-base font-semibold text-zinc-900">Masukkan Admin Token</h2>
-        <p className="mt-1 text-sm text-zinc-600">
-          Token ada di <code className="rounded bg-zinc-100 px-1.5 py-0.5 text-xs">.env</code> server
-          sebagai <code className="rounded bg-zinc-100 px-1.5 py-0.5 text-xs">ADMIN_TOKEN</code>.
-        </p>
-        <div className="mt-4 flex gap-2">
-          <input
-            type="password"
-            value={tokenInput}
-            onChange={(e) => setTokenInput(e.target.value)}
-            placeholder="••••••••••••"
-            className="flex-1 rounded-md border border-zinc-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-600 focus:outline-none focus:ring-1 focus:ring-emerald-600"
-            autoFocus
-          />
-          <button
-            type="submit"
-            className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-semibold text-white hover:bg-zinc-800"
-          >
-            Buka
-          </button>
-        </div>
-        {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
-      </form>
-    );
+  function handleSignOut() {
+    startSignOut(async () => {
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+      router.push("/admin/login");
+      router.refresh();
+    });
   }
 
   return (
     <div>
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-4 text-sm">
-          {data && (
-            <>
-              <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 font-semibold text-emerald-700">
-                {data.unread} belum dibaca
-              </span>
-              <span className="text-zinc-600">{data.total} total</span>
-            </>
-          )}
-        </div>
-        <div className="flex items-center gap-3">
-          <label className="flex items-center gap-2 text-sm text-zinc-700">
-            <input
-              type="checkbox"
-              checked={onlyUnread}
-              onChange={(e) => setOnlyUnread(e.target.checked)}
-              className="h-4 w-4 rounded border-zinc-300 text-emerald-600 focus:ring-emerald-600"
-            />
-            Hanya belum dibaca
-          </label>
-          <button
-            onClick={fetchList}
-            disabled={loading}
-            className="rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-50"
-          >
-            {loading ? "Memuat…" : "Refresh"}
-          </button>
-          <button
-            onClick={logout}
-            className="rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
-          >
-            Logout
-          </button>
-        </div>
+      <div className="mb-4 flex flex-wrap items-center justify-end gap-2 text-sm">
+        <label className="inline-flex cursor-pointer items-center gap-2">
+          <input
+            type="checkbox"
+            checked={onlyUnread}
+            onChange={(e) => setOnlyUnread(e.target.checked)}
+            className="h-4 w-4 rounded border-zinc-300 text-emerald-600 focus:ring-emerald-500"
+          />
+          Hanya belum dibaca
+        </label>
+        <button
+          type="button"
+          onClick={() => void fetchList()}
+          disabled={loading}
+          className="rounded-md border border-zinc-300 bg-white px-3 py-1.5 font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-50"
+        >
+          {loading ? "Memuat…" : "Refresh"}
+        </button>
+        <button
+          type="button"
+          onClick={handleSignOut}
+          className="rounded-md border border-zinc-300 bg-white px-3 py-1.5 font-medium text-zinc-700 hover:bg-zinc-50"
+        >
+          Logout
+        </button>
       </div>
 
       {error && (
-        <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+        <div
+          role="alert"
+          className="mb-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+        >
           {error}
         </div>
       )}
 
-      {!data || data.items.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-zinc-300 bg-white p-12 text-center text-sm text-zinc-500">
-          {loading ? "Memuat…" : onlyUnread ? "Tidak ada feedback yang belum dibaca." : "Belum ada feedback masuk."}
+      {data && (
+        <div className="mb-4 flex gap-4 text-sm text-zinc-600">
+          <span>
+            Total: <strong className="text-zinc-900">{data.total}</strong>
+          </span>
+          <span>
+            Belum dibaca:{" "}
+            <strong className={data.unread > 0 ? "text-emerald-700" : "text-zinc-900"}>
+              {data.unread}
+            </strong>
+          </span>
         </div>
-      ) : (
-        <ul className="space-y-3">
+      )}
+
+      {data && data.items.length === 0 && (
+        <div className="rounded-2xl border border-zinc-200 bg-white p-8 text-center text-sm text-zinc-500">
+          {onlyUnread
+            ? "Tidak ada feedback yang belum dibaca."
+            : "Belum ada feedback masuk."}
+        </div>
+      )}
+
+      {data && data.items.length > 0 && (
+        <div className="space-y-3">
           {data.items.map((f) => (
-            <li
+            <article
               key={f.id}
-              className={`rounded-2xl border bg-white p-4 shadow-sm transition-colors ${
+              className={`rounded-2xl border bg-white p-4 shadow-sm ${
                 f.is_read
                   ? "border-zinc-200"
-                  : "border-l-4 border-l-emerald-500 border-zinc-200"
+                  : "border-emerald-200 bg-emerald-50/30"
               }`}
             >
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                    <a
-                      href={`mailto:${f.email}`}
-                      className="font-semibold text-zinc-900 hover:text-emerald-700"
-                    >
-                      {f.email}
-                    </a>
-                    <span className="text-xs text-zinc-500">
-                      {new Date(f.created_at).toLocaleString("id-ID", {
-                        dateStyle: "medium",
-                        timeStyle: "short",
-                      })}
-                    </span>
+              <header className="mb-2 flex flex-wrap items-start justify-between gap-2">
+                <div>
+                  <p className="font-semibold text-zinc-900">{f.email}</p>
+                  <p className="text-xs text-zinc-500">
+                    {new Date(f.created_at).toLocaleString("id-ID", {
+                      dateStyle: "medium",
+                      timeStyle: "short",
+                    })}
+                    {f.ip && <span className="ml-2">· IP: {f.ip}</span>}
                     {f.page_url && (
                       <a
                         href={f.page_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-xs text-blue-600 hover:underline"
+                        className="ml-2 text-emerald-700 underline underline-offset-2"
                       >
-                        ↗ {(() => {
-                          try {
-                            return new URL(f.page_url).pathname;
-                          } catch {
-                            return f.page_url;
-                          }
-                        })()}
+                        Halaman
                       </a>
                     )}
-                  </div>
-                  <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-zinc-800">
-                    {f.message}
                   </p>
-                  <div className="mt-2 flex flex-wrap gap-3 text-xs text-zinc-500">
-                    {f.ip && <span>IP: {f.ip}</span>}
-                    {f.user_agent && (
-                      <span className="truncate max-w-md" title={f.user_agent}>
-                        {f.user_agent}
-                      </span>
-                    )}
-                  </div>
                 </div>
-                <button
-                  onClick={() => toggleRead(f.id, !f.is_read)}
-                  className={`shrink-0 rounded-md px-3 py-1.5 text-xs font-medium ${
-                    f.is_read
-                      ? "border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50"
-                      : "bg-emerald-600 text-white hover:bg-emerald-700"
-                  }`}
+                <div className="flex items-center gap-2 text-xs">
+                  {!f.is_read && (
+                    <span className="inline-flex items-center rounded-full bg-emerald-600 px-2 py-0.5 font-medium text-white">
+                      Baru
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => void toggleRead(f.id, f.is_read)}
+                    className="rounded-md border border-zinc-300 bg-white px-2.5 py-1 font-medium text-zinc-700 hover:bg-zinc-50"
+                  >
+                    {f.is_read ? "Tandai belum dibaca" : "Tandai dibaca"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void deleteItem(f.id)}
+                    className="rounded-md border border-red-200 bg-white px-2.5 py-1 font-medium text-red-700 hover:bg-red-50"
+                  >
+                    Hapus
+                  </button>
+                </div>
+              </header>
+              <p className="whitespace-pre-wrap text-sm text-zinc-700">
+                {f.message}
+              </p>
+              {f.user_agent && (
+                <p
+                  className="mt-2 truncate text-xs text-zinc-400"
+                  title={f.user_agent}
                 >
-                  {f.is_read ? "Tandai belum dibaca" : "Tandai dibaca"}
-                </button>
-              </div>
-            </li>
+                  UA: {f.user_agent}
+                </p>
+              )}
+            </article>
           ))}
-        </ul>
+        </div>
       )}
     </div>
   );
