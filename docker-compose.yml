@@ -40,7 +40,7 @@ services:
     environment:
       NODE_ENV: production
       # Inside compose network, db is reachable as hostname "db"
-      DATABASE_URL: postgresql://${POSTGRES_USER:***@db:5432/${POSTGRES_DB:-cvku}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-cvku}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-cvku}
       NOVITA_API_KEY: ${NOVITA_API_KEY:?NOVITA_API_KEY required - set in .env}
       ADMIN_TOKEN: ${ADMIN_TOKEN:?ADMIN_TOKEN required - set in .env}
       # Tighter cookie/CORS if needed later:
