@@ -10,6 +10,7 @@ import {
   SITE_URL,
   articleSchema,
   breadcrumbSchema,
+  faqSchema,
 } from "@/lib/seo/schemas";
 import { JsonLd } from "@/components/json-ld";
 import { CvDocument } from "@/components/cv-document";
@@ -64,6 +65,25 @@ export default async function ContohCVDetail({
     { name: cv.judul, url: `${SITE_URL}/contoh-cv/${cv.slug}` },
   ]);
 
+  // FAQ schema (rich snippet) — pakai spesifik kalau ada, kalau ngga default
+  const faqs =
+    cv.faqs && cv.faqs.length > 0
+      ? cv.faqs
+      : [
+          {
+            question: `Apakah contoh CV ${cv.judul.replace(
+              /^Contoh CV\s+/i,
+              ""
+            )} ini bisa langsung dipakai?`,
+            answer: `Bisa, tapi sebaiknya kamu sesuaikan dengan pengalaman dan data dirimu sendiri. Contoh ini adalah template yang bisa kamu adaptasi — ganti nama, email, telepon, dan pengalaman kerja dengan data pribadimu. Struktur dan formatnya sudah teroptimasi untuk ATS (Applicant Tracking System) dan HRD Indonesia.`,
+          },
+          {
+            question: "Format file apa yang sebaiknya dipakai untuk kirim CV?",
+            answer:
+              "Format yang paling aman dan ATS-friendly adalah PDF. Microsoft Word (.docx) juga bisa, tapi PDF lebih konsisten — tampilan tidak berubah di perangkat manapun dan ATS modern sudah bisa membaca PDF dengan baik. Hindari format gambar (JPG/PNG) karena ATS tidak bisa membaca teksnya.",
+          },
+        ];
+
   return (
     <main className="mx-auto max-w-4xl px-4 py-12 sm:py-16">
       <JsonLd
@@ -76,6 +96,7 @@ export default async function ContohCVDetail({
             publishedTime: cv.publishedTime,
             modifiedTime: cv.modifiedTime,
           }),
+          faqSchema(faqs),
         ]}
       />
 
@@ -159,6 +180,34 @@ export default async function ContohCVDetail({
             </Link>{' '}
             untuk hasil versi Anda.
           </p>
+        </section>
+
+        {/* FAQ section — untuk FAQPage rich snippet */}
+        <section className="mt-12 rounded-2xl border border-zinc-200 bg-white p-6">
+          <h2 className="text-xl font-bold text-zinc-900 mb-4">
+            Pertanyaan yang Sering Ditanyakan
+          </h2>
+          <div className="space-y-4">
+            {faqs.map((f, i) => (
+              <details
+                key={i}
+                className="group rounded-lg border border-zinc-200 bg-zinc-50 p-4 [&_summary::-webkit-details-marker]:hidden"
+              >
+                <summary className="flex cursor-pointer items-start justify-between gap-3 font-semibold text-zinc-900">
+                  <span>{f.question}</span>
+                  <span
+                    aria-hidden="true"
+                    className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-700 transition-transform group-open:rotate-45"
+                  >
+                    +
+                  </span>
+                </summary>
+                <p className="mt-3 text-zinc-700 leading-relaxed">
+                  {f.answer}
+                </p>
+              </details>
+            ))}
+          </div>
         </section>
 
         {/* Related */}

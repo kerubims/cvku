@@ -1,8 +1,14 @@
 /**
- * 10 contoh CV Indonesia untuk programmatic SEO.
+ * 40 contoh CV Indonesia untuk programmatic SEO.
  * Tulisan asli (bukan AI-slop) — disesuaikan persona Indonesia.
  * Slug mengikuti keyword long-tail PRD §7.
+ *
+ * UPDATED 2026-08-28: tambah 30 entry baru (total 40 halaman).
+ * Existing 10 (batch #1) dideklarasikan di bawah ini.
+ * Batch #2 (30 baru) di-import dari data-batch-30.ts.
  */
+
+import { CONTOH_CV_BATCH_30 } from "./data-batch-30";
 
 export interface ContohCV {
   slug: string;
@@ -38,6 +44,11 @@ export interface ContohCV {
     skill: string[];
     tambahan?: { judul: string; isi: string }[];
   };
+  /**
+   * FAQ spesifik (optional) — kalau ada, dipakai untuk FAQPage schema (rich snippet).
+   * Kalau ngga ada, page.tsx generate default FAQ generik.
+   */
+  faqs?: { question: string; answer: string }[];
 }
 
 export const CONTOH_CV_LIST: ContohCV[] = [
@@ -851,6 +862,8 @@ export const CONTOH_CV_LIST: ContohCV[] = [
       ],
     },
   },
+  // ===== Batch #2: 30 entry baru (2026-08-28) =====
+  ...CONTOH_CV_BATCH_30,
 ];
 
 export function getContohBySlug(slug: string): ContohCV | undefined {

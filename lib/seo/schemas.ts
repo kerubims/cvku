@@ -4,7 +4,8 @@
  * (HowTo sudah tidak memicu rich result di 2026 — kita skip sesuai referensi.)
  */
 
-export const SITE_URL = "https://cv.ksm.web.id";
+// Domain fix: cvku.ksm.web.id (target PRD lama cv.ksm.web.id DIBATALKAN)
+export const SITE_URL = "https://cvku.ksm.web.id";
 export const SITE_NAME = "CVKu";
 
 export const ORG_SCHEMA = {
@@ -98,6 +99,27 @@ export function breadcrumbSchema(
       position: i + 1,
       name: it.name,
       item: it.url,
+    })),
+  };
+}
+
+/**
+ * FAQPage schema (rich snippet Google).
+ * Minimal 1 Q&A, idealnya 2-4 per halaman untuk dapet FAQ rich result.
+ */
+export function faqSchema(
+  faqs: { question: string; answer: string }[]
+) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((f) => ({
+      "@type": "Question",
+      name: f.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: f.answer,
+      },
     })),
   };
 }
