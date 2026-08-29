@@ -14,7 +14,13 @@
  */
 
 const BASE_URL = process.env.OMNIROUTE_BASE_URL || "http://192.168.1.89:20128/v1";
-const MODEL = process.env.OMNIROUTE_MODEL || "auto/best-free";
+// 2026-08-29: setelah benchmark — `auto/cheap` & `auto/fast` lagi antri panjang
+// (25-40s timeout), `openrouter/free` paling cepet & reliable (9-17s, support JSON).
+// best-free chain (deepseek-v3.2, claude-haiku) kena 429/400, deepseek-v4-flash kena
+// content filter di IP server, jadi kita pakai `openrouter/free` (minimax/minimax-m3:free).
+const MODEL = process.env.OMNIROUTE_MODEL || "openrouter/free";
+// Fallback chain kalau primary timeout/429.
+const FALLBACK_MODELS = ["auto/cheap", "auto/fast"];
 
 export interface ChatMessage {
   role: "system" | "user" | "assistant";
@@ -63,6 +69,8 @@ export async function omnirouteChat(
     messages,
     max_tokens: maxTokens,
     temperature,
+    stream: false, // 2026-08-29: explicit non-stream — tanpa ini beberapa model OmniRoute
+    // (e.g. auto/cheap chain) default ke SSE streaming, yang bikin `res.json()` gagal parse.
   };
   if (responseFormat) body.response_format = responseFormat;
 

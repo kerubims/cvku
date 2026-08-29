@@ -122,31 +122,60 @@ function validateAnalysis(obj: unknown): AiAnalysis | null {
 
 /**
  * Run AI analysis (opt-in) on CV text.
- * Throws OmniRouteError jika API gagal (caller handle fallback).
+ * Throws OmniRouteError jika semua model gagal (caller handle fallback).
+ *
+ * 2026-08-29: retry with fallback models — primary `auto/cheap` kadang timeout/antri,
+ * fallback ke `auto/fast` (juga big-pickle pool, biasanya lebih cepet) atau `openrouter/free`.
  */
 export async function analyzeCvWithAi(cvText: string): Promise<AiAnalysis> {
-  const content = await omnirouteChat(
-    [
-      { role: "system", content: SYSTEM_PROMPT },
-      { role: "user", content: buildUserPrompt(cvText) },
-    ],
-    {
-      maxTokens: 1500,
-      temperature: 0.3,
-      responseFormat: { type: "json_object" },
-      timeoutMs: 45_000,
-    }
-  );
+  const models = [
+    process.env.OMNIROUTE_MODEL || "openrouter/free", // ~9s, paling reliable (2026-08-29)
+    "auto/cheap",
+    "auto/fast",
+  ];
+  const primaryTimeoutMs = 15_000; // openrouter/free biasanya selesai < 10s
+  const fallbackTimeoutMs = 25_000; // auto/cheap/fast sering timeout karena antri
 
-  const analysis = tryParseJson(content);
-  if (!analysis) {
-    throw new OmniRouteError(
-      "Gagal parse JSON dari AI response",
-      502,
-      "INVALID_JSON"
-    );
+  let lastError: Error | null = null;
+  for (let i = 0; i < models.length; i++) {
+    const model = models[i];
+    const isPrimary = i === 0;
+    const timeoutMs = isPrimary ? primaryTimeoutMs : fallbackTimeoutMs;
+    const start = Date.now();
+    try {
+      const content = await omnirouteChat(
+        [
+          { role: "system", content: SYSTEM_PROMPT },
+          { role: "user", content: buildUserPrompt(cvText) },
+        ],
+        {
+          model,
+          maxTokens: 1500,
+          temperature: 0.3,
+          responseFormat: { type: "json_object" },
+          timeoutMs,
+        }
+      );
+      const analysis = tryParseJson(content);
+      if (analysis) {
+        console.log(`[ats-analyzer] AI OK with ${model} in ${Date.now() - start}ms`);
+        return analysis;
+      }
+      // Parse gagal — coba model berikutnya
+      console.warn(`[ats-analyzer] AI ${model} returned invalid JSON (${Date.now() - start}ms), trying fallback`);
+      lastError = new OmniRouteError(
+        `Gagal parse JSON dari model ${model}`,
+        502,
+        "INVALID_JSON"
+      );
+    } catch (err) {
+      const e = err instanceof Error ? err : new Error(String(err));
+      console.warn(`[ats-analyzer] AI ${model} failed in ${Date.now() - start}ms: ${e.message}, trying fallback`);
+      lastError = e;
+      // Lanjut ke fallback model
+    }
   }
-  return analysis;
+  throw lastError ?? new OmniRouteError("All OmniRoute models failed", 503, "ALL_FAILED");
 }
 
 /**
