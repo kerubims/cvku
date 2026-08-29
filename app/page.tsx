@@ -75,12 +75,22 @@ export default async function LandingPage() {
                 : "Gratis selamanya saat rilis. Tanpa kartu kredit."}
             </p>
           </div>
-          <div className="mt-6 border-t border-zinc-200 pt-5">
+          <div className="mt-6 border-t border-zinc-200 pt-5 flex flex-wrap items-center gap-x-5 gap-y-2">
             <a
               href="/buat"
               className="inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700 transition hover:text-emerald-800"
             >
               Atau langsung coba buat CV sekarang
+              <span aria-hidden>→</span>
+            </a>
+            <a
+              href="/ats-checker"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-zinc-700 transition hover:text-zinc-900"
+            >
+              <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+                <path fillRule="evenodd" d="M10 1a4 4 0 00-4 4v1H5a2 2 0 00-2 2v9a2 2 0 002 2h10a2 2 0 002-2V8a2 2 0 00-2-2h-1V5a4 4 0 00-4-4zm2 5V5a2 2 0 10-4 0v1h4zm-6 4a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
+              </svg>
+              Cek skor CV ATS gratis
               <span aria-hidden>→</span>
             </a>
           </div>
