@@ -1644,93 +1644,6 @@ export const CONTOH_CV_BATCH_30: ContohCV[] = [
     },
   },
   {
-    slug: "bumn",
-    judul: "Contoh CV Fresh Graduate yang Lolos Rekrutmen BUMN 2026",
-    h1: "Contoh CV Fresh Graduate BUMN — Lolos Tes Potensi Akademik & Interview",
-    metaDescription:
-      "Contoh CV fresh graduate yang dipakai lolos rekrutmen BUMN (Telkom, Pertamina, BNI, Mandiri). Lengkap dengan format standar dan skill yang BUMN cari.",
-    kategori: "Public Sector",
-    relatedSlugs: ["fresh-graduate-s1", "pns-cpns", "programmer-fresh-graduate"],
-    publishedTime: "2026-08-28T00:00:00+07:00",
-    modifiedTime: "2026-08-28T00:00:00+07:00",
-    intro: [
-      "Rekrutmen BUMN (Telkom, Pertamina, BNI, Mandiri, BRI) sangat kompetitif — ribuan pelamar per posisi. CV kamu harus langsung nge-hire di screening pertama. Yang biasanya lolos: IPK tinggi, pengalaman organisasi kuat, kemampuan bahasa Inggris, dan skill teknis sesuai formasi.",
-      "Yang perlu: IPK min 3.00, pengalaman organisasi/persiapan karir, bahasa Inggris aktif, skill teknis (IT, finance, marketing sesuai formasi), dan personality yang kuat di interview.",
-    ],
-    tips: [
-      {
-        judul: "IPK & universitas prestigious",
-        isi:
-          "IPK min 3.00, universitas akreditasi A. Kalau dari PTN top (UI, ITB, UGM, IPB, ITS), tulis nama universitas prominently.",
-      },
-      {
-        judul: "Pengalaman organisasi & komunitas",
-        isi:
-          "BEM, himpunan, komunitas profesional, kepanitiaan event kampus — semua nge-hitung. HRD BUMN cari leader & team player.",
-      },
-      {
-        judul: "English proficiency & sertifikasi",
-        isi:
-          "TOEFL min 500, atau IELTS 6.0+. Punya sertifikasi profesi (CFA, ACCA, Cisco, Microsoft) = nilai plus sangat besar.",
-      },
-    ],
-    cv: {
-      nama: "Ghita Salsabila Rahmadhani",
-      jabatan: "Pelamar Officer Development Program — PT Bank Mandiri",
-      kota: "Jakarta, DKI Jakarta",
-      email: "ghita.salsabila@email.com",
-      telepon: "0812-3344-7788",
-      ringkasan:
-        "Fresh graduate S1 Akuntansi UI (IPK 3.85), aktif di organisasi & kepanitiaan kampus. TOEFL 580, internship di KAP Big Four. Tertarik di bidang corporate banking & finance.",
-      pengalaman: [
-        {
-          posisi: "Audit Intern",
-          perusahaan: "KAP Big Four (Jakarta)",
-          mulai: "Jul 2024",
-          selesai: "Des 2024",
-          deskripsi: [
-            "Assist senior auditor untuk audit laporan keuangan 3 klien manufaktur & ritel",
-            "Bikin working paper & tes substantif untuk akun piutang & persediaan",
-            "Identifikasi 2 control weakness, presentasi ke manager audit",
-          ],
-        },
-        {
-          posisi: "Ketua Divisi Riset & Pengembangan",
-          perusahaan: "Ikatan Akuntan Indonesia — Kompartemen UI",
-          mulai: "2022",
-          selesai: "2023",
-          deskripsi: [
-            "Lead 12 tim riset, publish 4 working paper tentang tren akuntansi digital",
-            "Selenggarakan national accounting Olympiad 2023 (300+ peserta dari 20 universitas)",
-          ],
-        },
-      ],
-      pendidikan: [
-        {
-          sekolah: "Universitas Indonesia",
-          jurusan: "S1 Akuntansi (IPK 3.85/4.00, Cumlaude)",
-          mulai: "2020",
-          selesai: "2024",
-        },
-      ],
-      skill: [
-        "Microsoft Excel (advanced)",
-        "SAP (dasar)",
-        "SQL (dasar)",
-        "Bahasa Inggris (TOEFL 580)",
-        "Analisis laporan keuangan",
-        "Leadership",
-        "Public speaking",
-      ],
-      tambahan: [
-        {
-          judul: "Sertifikasi",
-          isi: "Microsoft Office Specialist (Excel 2019, 2022), Brevet A & B (Pajak, 2024)",
-        },
-      ],
-    },
-  },
-  {
     slug: "kurikulum-vitae-mahasiswa",
     judul: "Contoh CV Mahasiswa / Curiculum Vitae untuk Magang 2026",
     h1: "Contoh CV Mahasiswa untuk Magang — Fresh Graduate & Aktif Organisasi",
@@ -2601,6 +2514,94 @@ export const CONTOH_CV_BATCH_30: ContohCV[] = [
         {
           judul: "Organisasi",
           isi: "Anggota OSIS (Sie IT, 2022-2023), Juara 2 Lomba Web Design Tingkat Kota Solo (2023)",
+        },
+      ],
+    },
+  },
+  // ===== Entry #30: long-tail unik "fresh graduate bank" (menggantikan duplikat 'bumn') =====
+  {
+    slug: "fresh-graduate-bank",
+    judul: "Contoh CV Fresh Graduate Bank — BNI, BRI, Mandiri, BCA 2026",
+    h1: "Contoh CV Fresh Graduate Bank — Lolos Screening Bank Swasta & BUMN",
+    metaDescription:
+      "Contoh CV fresh graduate yang dipakai apply ke bank (BNI, BRI, Mandiri, BCA, CIMB). Lengkap dengan skill, pengalaman organisasi, dan sertifikasi perbankan.",
+    kategori: "Public Sector",
+    relatedSlugs: ["bumn", "fresh-graduate-s1", "fresh-graduate-tanpa-pengalaman"],
+    publishedTime: "2026-08-28T00:00:00+07:00",
+    modifiedTime: "2026-08-28T00:00:00+07:00",
+    intro: [
+      "Apply ke bank Indonesia (BNI, BRI, Mandiri, BCA, CIMB) butuh CV yang menonjolkan IPK, pengalaman organisasi, dan kemampuan bahasa Inggris. HRD bank sangat kompetitif — ribuan pelamar per posisi, jadi CV harus langsung nge-hire di screening pertama.",
+      "Yang HRD bank cari: IPK min 3.00, pengalaman organisasi kampus, English proficiency, dan kepribadian yang bisa di-train. Sertifikasi perbankan (OJK, AAJI) nilai plus besar.",
+    ],
+    tips: [
+      {
+        judul: "IPK 3.00+ wajib",
+        isi:
+          "IPK di bawah 3.00 bikin kamu susah dapet panggilan. Kalau IPK <3.00, tonjolkan pengalaman organisasi & skill teknis.",
+      },
+      {
+        judul: "Pengalaman organisasi & kepanitiaan",
+        isi:
+          "BEM, himpunan, komunitas, kepanitiaan event kampus — semua nge-hitung. HRD bank cari leader & team player.",
+      },
+      {
+        judul: "English proficiency",
+        isi:
+          "TOEFL min 500, atau IELTS 6.0+. Bank Indonesia sekarang banyak exposure ke global banking — English skill sangat dihargai.",
+      },
+    ],
+    cv: {
+      nama: "Reyna Anindya Pramesti",
+      jabatan: "Pelamar Officer Development Program — PT Bank Central Asia",
+      kota: "Jakarta, DKI Jakarta",
+      email: "reyna.anindya@email.com",
+      telepon: "0813-9988-3344",
+      ringkasan:
+        "Fresh graduate S1 Manajemen UI (IPK 3.82), aktif di BEM & komunitas investasi. TOEFL 580, magang di bank digital YUKK. Tertarik di bidang corporate banking & wealth management.",
+      pengalaman: [
+        {
+          posisi: "Magang Customer Service Bank Digital",
+          perusahaan: "YUKK — Bank Digital (Jakarta)",
+          mulai: "Jul 2024",
+          selesai: "Des 2024",
+          deskripsi: [
+            "Handle 50+ customer/hari via live chat & email (open account, transaksi, komplain)",
+            "Resolve 95% komplain dalam first contact, CSAT 4.7/5",
+            "Bantu tim marketing bikin content edukasi financial literacy (4 artikel blog)",
+          ],
+        },
+        {
+          posisi: "Ketua Divisi Riset Pasar Modal",
+          perusahaan: "Komunitas Investasi UI",
+          mulai: "2022",
+          selesai: "2023",
+          deskripsi: [
+            "Lead 8 tim analis, publish 12 working paper tentang saham LQ45",
+            "Selenggarakan 4 workshop 'Belajar Saham Pemula' untuk 200+ peserta",
+          ],
+        },
+      ],
+      pendidikan: [
+        {
+          sekolah: "Universitas Indonesia",
+          jurusan: "S1 Manajemen (IPK 3.82, Cumlaude)",
+          mulai: "2020",
+          selesai: "2024",
+        },
+      ],
+      skill: [
+        "Microsoft Excel (advanced — VLOOKUP, pivot, financial modeling)",
+        "Bahasa Inggris (TOEFL 580)",
+        "Riset pasar modal",
+        "Komunikasi customer",
+        "Public speaking",
+        "Leadership",
+        "Bahasa Mandarin (dasar)",
+      ],
+      tambahan: [
+        {
+          judul: "Sertifikasi",
+          isi: "Sertifikasi OJK Level 1 (2024), Microsoft Office Specialist Excel (2023)",
         },
       ],
     },
