@@ -129,12 +129,13 @@ function validateAnalysis(obj: unknown): AiAnalysis | null {
  */
 export async function analyzeCvWithAi(cvText: string): Promise<AiAnalysis> {
   const models = [
-    process.env.OMNIROUTE_MODEL || "openrouter/free", // ~9s, paling reliable (2026-08-29)
+    process.env.OMNIROUTE_MODEL || "openrouter/free", // ~9-15s, paling reliable (2026-08-29)
+    "FREEEEE", // 1-2s, alternatif pool sama, backup utama
     "auto/cheap",
     "auto/fast",
   ];
-  const primaryTimeoutMs = 15_000; // openrouter/free biasanya selesai < 10s
-  const fallbackTimeoutMs = 25_000; // auto/cheap/fast sering timeout karena antri
+  const primaryTimeoutMs = 25_000; // toleran spike 15-25s di openrouter/free pool
+  const fallbackTimeoutMs = 20_000; // FREEEEE/auto/* biasanya <10s
 
   let lastError: Error | null = null;
   for (let i = 0; i < models.length; i++) {
