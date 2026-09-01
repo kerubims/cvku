@@ -22,7 +22,7 @@ const ROTATING_MESSAGES = [
 
 function StepIcon({ name, active }: { name: string; active: boolean }) {
   const color = active ? "text-emerald-700" : "text-zinc-300";
-  const common = { width: 18, height: 18, viewBox: "0 0 20 20", fill: "currentColor" } as const;
+  const common = { width: 16, height: 16, viewBox: "0 0 20 20", fill: "currentColor" } as const;
   switch (name) {
     case "doc":
       return (
@@ -33,20 +33,32 @@ function StepIcon({ name, active }: { name: string; active: boolean }) {
     case "check":
       return (
         <svg {...common} className={color}>
-          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+          <path
+            fillRule="evenodd"
+            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+            clipRule="evenodd"
+          />
         </svg>
       );
     case "list":
       return (
         <svg {...common} className={color}>
-          <path fillRule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 5a1 1 0 011-1h7a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
+          <path
+            fillRule="evenodd"
+            d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 5a1 1 0 011-1h7a1 1 0 110 2H4a1 1 0 01-1-1z"
+            clipRule="evenodd"
+          />
         </svg>
       );
     case "spell":
       return (
         <svg {...common} className={color}>
           <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
-          <path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clipRule="evenodd" />
+          <path
+            fillRule="evenodd"
+            d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z"
+            clipRule="evenodd"
+          />
         </svg>
       );
     case "spark":
@@ -73,8 +85,6 @@ export function LoadingIndicator({
   const totalSteps = aiEnabled ? 5 : 4;
   const stepDurationMs = (estimatedSeconds * 1000) / totalSteps;
 
-  // Advance the visible "current step" linearly so the UI feels alive even
-  // though the actual API call is one round-trip on the server.
   useEffect(() => {
     const stepTimer = setInterval(() => {
       setStep((s) => Math.min(s + 1, totalSteps - 1));
@@ -99,18 +109,25 @@ export function LoadingIndicator({
     <div
       role="status"
       aria-live="polite"
-      className="rounded-2xl border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 via-white to-zinc-50 p-8 shadow-sm"
+      className="rounded-xl sm:rounded-2xl border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 via-white to-zinc-50 p-4 sm:p-8 shadow-sm"
     >
       {/* Top: spinning ring + headline */}
       <div className="flex flex-col items-center text-center">
         <div className="relative">
-          <div className="h-16 w-16 rounded-full border-4 border-emerald-100" />
+          <div className="h-12 w-12 sm:h-16 sm:w-16 rounded-full border-4 border-emerald-100" />
           <div
-            className="absolute inset-0 h-16 w-16 animate-spin rounded-full border-4 border-transparent border-t-emerald-600 border-r-emerald-600"
+            className="absolute inset-0 h-12 w-12 sm:h-16 sm:w-16 animate-spin rounded-full border-4 border-transparent border-t-emerald-600 border-r-emerald-600"
             style={{ animationDuration: "0.9s" }}
           />
           <div className="absolute inset-0 flex items-center justify-center">
-            <svg width="22" height="22" viewBox="0 0 20 20" fill="currentColor" className="text-emerald-700">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              className="text-emerald-700"
+              aria-hidden="true"
+            >
               <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
               <path
                 fillRule="evenodd"
@@ -121,21 +138,24 @@ export function LoadingIndicator({
           </div>
         </div>
 
-        <h2 className="mt-5 text-xl font-bold text-zinc-900">
+        <h2 className="mt-4 sm:mt-5 text-lg sm:text-xl font-bold text-zinc-900">
           {aiEnabled ? "Menganalisis dengan AI..." : "Menganalisis CV..."}
         </h2>
-        <p className="mt-1 text-sm text-zinc-600 transition-opacity duration-300" key={msgIndex}>
+        <p
+          className="mt-1 text-xs sm:text-sm text-zinc-600 transition-opacity duration-300 px-2"
+          key={msgIndex}
+        >
           {ROTATING_MESSAGES[msgIndex]} ({elapsed}s{aiNote})
         </p>
       </div>
 
       {/* Progress bar */}
-      <div className="mt-6">
-        <div className="flex items-center justify-between text-xs font-semibold text-zinc-600 mb-2">
+      <div className="mt-5 sm:mt-6">
+        <div className="flex items-center justify-between text-[11px] sm:text-xs font-semibold text-zinc-600 mb-1.5 sm:mb-2">
           <span>Progress</span>
           <span className="tabular-nums">{progressPct}%</span>
         </div>
-        <div className="h-2 w-full overflow-hidden rounded-full bg-zinc-100">
+        <div className="h-1.5 sm:h-2 w-full overflow-hidden rounded-full bg-zinc-100">
           <div
             className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-emerald-700 transition-all duration-700 ease-out"
             style={{ width: `${progressPct}%` }}
@@ -144,14 +164,14 @@ export function LoadingIndicator({
       </div>
 
       {/* Steps */}
-      <ol className="mt-6 space-y-2.5">
+      <ol className="mt-4 sm:mt-6 space-y-1.5 sm:space-y-2.5">
         {STEPS.slice(0, totalSteps).map((s, i) => {
           const done = i < step;
           const active = i === step;
           return (
             <li
               key={s.label}
-              className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all duration-300 ${
+              className={`flex items-center gap-2.5 sm:gap-3 rounded-md sm:rounded-lg px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm transition-all duration-300 ${
                 active
                   ? "bg-emerald-50 text-zinc-900 ring-1 ring-emerald-200"
                   : done
@@ -160,7 +180,7 @@ export function LoadingIndicator({
               }`}
             >
               <span
-                className={`flex h-7 w-7 items-center justify-center rounded-full transition-colors ${
+                className={`flex h-6 w-6 sm:h-7 sm:w-7 shrink-0 items-center justify-center rounded-full transition-colors ${
                   done
                     ? "bg-emerald-600 text-white"
                     : active
@@ -169,7 +189,14 @@ export function LoadingIndicator({
                 }`}
               >
                 {done ? (
-                  <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor">
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    className="sm:w-3.5 sm:h-3.5"
+                    aria-hidden="true"
+                  >
                     <path
                       fillRule="evenodd"
                       d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
@@ -180,12 +207,23 @@ export function LoadingIndicator({
                   <StepIcon name={s.icon} active={active} />
                 )}
               </span>
-              <span className={active ? "font-semibold" : ""}>{s.label}</span>
+              <span className={`min-w-0 break-words ${active ? "font-semibold" : ""}`}>
+                {s.label}
+              </span>
               {active && (
-                <span className="ml-auto flex gap-1">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-600 animate-bounce" style={{ animationDelay: "0ms" }} />
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-600 animate-bounce" style={{ animationDelay: "150ms" }} />
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-600 animate-bounce" style={{ animationDelay: "300ms" }} />
+                <span className="ml-auto flex shrink-0 gap-1" aria-label="sedang proses">
+                  <span
+                    className="h-1.5 w-1.5 rounded-full bg-emerald-600 animate-bounce"
+                    style={{ animationDelay: "0ms" }}
+                  />
+                  <span
+                    className="h-1.5 w-1.5 rounded-full bg-emerald-600 animate-bounce"
+                    style={{ animationDelay: "150ms" }}
+                  />
+                  <span
+                    className="h-1.5 w-1.5 rounded-full bg-emerald-600 animate-bounce"
+                    style={{ animationDelay: "300ms" }}
+                  />
                 </span>
               )}
             </li>
@@ -193,7 +231,7 @@ export function LoadingIndicator({
         })}
       </ol>
 
-      <p className="mt-6 text-center text-xs text-zinc-500">
+      <p className="mt-4 sm:mt-6 text-center text-[11px] sm:text-xs text-zinc-500 px-2">
         Mohon tunggu sebentar, lagi kerja keras buat CV kamu ✨
       </p>
     </div>

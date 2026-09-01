@@ -101,14 +101,16 @@ export function AtsCheckerClient() {
   }, []);
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-12 sm:py-16">
+    <div className="mx-auto w-full max-w-4xl px-4 sm:px-6 py-10 sm:py-16">
       {/* Header */}
-      <header className="mb-8 text-center">
-        <p className="text-sm font-medium text-emerald-700 mb-2">Gratis • Tanpa Login • Hasil Instan</p>
-        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-zinc-900">
+      <header className="mb-6 sm:mb-8 text-center">
+        <p className="text-xs sm:text-sm font-medium text-emerald-700 mb-2">
+          Gratis • Tanpa Login • Hasil Instan
+        </p>
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-zinc-900">
           Cek Skor CV ATS Kamu
         </h1>
-        <p className="mt-3 text-zinc-600 max-w-2xl mx-auto">
+        <p className="mt-2 sm:mt-3 text-sm sm:text-base text-zinc-600 max-w-2xl mx-auto px-2 sm:px-0">
           Paste CV atau upload file PDF/DOCX. Sistem akan menganalisis 8 aspek ATS-friendliness
           dan memberikan skor 0-100 plus saran konkret untuk perbaikan.
         </p>
@@ -126,7 +128,7 @@ export function AtsCheckerClient() {
 
       {/* Form */}
       {status !== "success" && status !== "loading" && (
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
           {/* Textarea */}
           <div>
             <label htmlFor="cv-text" className="block text-sm font-semibold text-zinc-900 mb-2">
@@ -140,7 +142,7 @@ export function AtsCheckerClient() {
               rows={12}
               maxLength={20_000}
               disabled={false}
-              className="w-full rounded-lg border border-zinc-300 bg-white px-4 py-3 text-sm leading-relaxed text-zinc-900 placeholder-zinc-400 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/20 disabled:bg-zinc-50 disabled:cursor-not-allowed resize-y"
+              className="w-full rounded-lg border border-zinc-300 bg-white px-3.5 sm:px-4 py-2.5 sm:py-3 text-sm leading-relaxed text-zinc-900 placeholder-zinc-400 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/20 disabled:bg-zinc-50 disabled:cursor-not-allowed resize-y"
             />
             <div className="mt-1 flex justify-between text-xs text-zinc-500">
               <span>
@@ -169,7 +171,7 @@ export function AtsCheckerClient() {
                 accept=".pdf,.docx,.doc,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                 onChange={handleFileChange}
                 disabled={false}
-                className="block w-full text-sm text-zinc-600 file:mr-3 file:rounded-md file:border-0 file:bg-emerald-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-emerald-700 hover:file:bg-emerald-100 disabled:opacity-50"
+                className="block w-full min-w-0 text-sm text-zinc-600 file:mr-3 file:rounded-md file:border-0 file:bg-emerald-50 file:px-3 sm:file:px-4 file:py-2 file:text-sm file:font-semibold file:text-emerald-700 hover:file:bg-emerald-100 disabled:opacity-50"
               />
               {file && (
                 <button
@@ -182,7 +184,7 @@ export function AtsCheckerClient() {
               )}
             </div>
             {file && (
-              <p className="mt-2 text-xs text-zinc-500">
+              <p className="mt-2 text-xs text-zinc-500 break-all">
                 File dipilih: <span className="font-medium">{file.name}</span> (
                 {(file.size / 1024).toFixed(0)}KB)
               </p>
@@ -190,16 +192,16 @@ export function AtsCheckerClient() {
           </div>
 
           {/* AI opt-in */}
-          <div className="rounded-lg border border-amber-200 bg-amber-50/50 p-4">
+          <div className="rounded-lg border border-amber-200 bg-amber-50/50 p-3.5 sm:p-4">
             <label className="flex items-start gap-3 cursor-pointer">
               <input
                 type="checkbox"
                 checked={aiEnabled}
                 onChange={(e) => setAiEnabled(e.target.checked)}
                 disabled={false}
-                className="mt-0.5 h-4 w-4 rounded border-zinc-300 text-emerald-600 focus:ring-emerald-600 disabled:opacity-50"
+                className="mt-0.5 h-4 w-4 shrink-0 rounded border-zinc-300 text-emerald-600 focus:ring-emerald-600 disabled:opacity-50"
               />
-              <div className="flex-1">
+              <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-zinc-900">
                   Aktifkan Analisis AI (Opsional, +3-5 detik)
                 </p>
@@ -223,7 +225,7 @@ export function AtsCheckerClient() {
           <button
             type="submit"
             disabled={!canSubmit}
-            className="group relative w-full overflow-hidden rounded-lg bg-emerald-700 px-6 py-3 text-base font-semibold text-white shadow-sm transition hover:bg-emerald-800 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="group relative w-full overflow-hidden rounded-lg bg-emerald-700 px-4 sm:px-6 py-3 sm:py-3.5 text-sm sm:text-base font-semibold text-white shadow-sm transition hover:bg-emerald-800 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <span className="relative z-10 inline-flex items-center justify-center gap-2">
               <svg
@@ -248,7 +250,7 @@ export function AtsCheckerClient() {
             />
           </button>
 
-          <p className="text-xs text-zinc-500 text-center">
+          <p className="text-xs text-zinc-500 text-center px-2 sm:px-0">
             CV Anda tidak disimpan ke server. Analisis dilakukan real-time lalu dilupakan.
             Baca{" "}
             <Link href="/privasi" className="text-emerald-700 underline">
@@ -313,10 +315,12 @@ function ResultSection({
       )}
 
       {/* Score gauge + headline */}
-      <div className="rounded-2xl border border-zinc-200 bg-white p-8 text-center">
+      <div className="rounded-xl sm:rounded-2xl border border-zinc-200 bg-white p-5 sm:p-8 text-center">
         <ScoreGauge score={result.totalScore} status={result.status} />
-        <h2 className="mt-6 text-2xl font-bold text-zinc-900">{result.headline}</h2>
-        <p className="mt-2 text-sm text-zinc-500">
+        <h2 className="mt-5 sm:mt-6 text-lg sm:text-2xl font-bold text-zinc-900 px-2">
+          {result.headline}
+        </h2>
+        <p className="mt-2 text-xs sm:text-sm text-zinc-500 break-words">
           {result.meta.wordCount} kata dianalisis dalam {result.meta.scoringDurationMs}ms
           {aiEnabled && result.aiScore ? ` • + AI: ${result.aiScore}/100` : ""}
         </p>
@@ -332,29 +336,29 @@ function ResultSection({
 
       {/* 🔧 PERBAIKI SEKARANG — primary CTA to fix issues */}
       {isWorthFixing && (
-        <div className="relative overflow-hidden rounded-2xl border-2 border-emerald-300 bg-gradient-to-br from-emerald-50 via-white to-emerald-50 p-6 sm:p-8">
+        <div className="relative overflow-hidden rounded-xl sm:rounded-2xl border-2 border-emerald-300 bg-gradient-to-br from-emerald-50 via-white to-emerald-50 p-5 sm:p-8">
           {/* Subtle pulsing accent — kept persistent per Mas Ubim's request */}
           <div
-            className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-emerald-200/50 blur-3xl"
+            className="absolute -right-10 -top-10 h-32 w-32 sm:h-40 sm:w-40 rounded-full bg-emerald-200/50 blur-3xl"
             aria-hidden
           />
           <div
-            className="absolute -left-10 -bottom-10 h-32 w-32 rounded-full bg-emerald-300/40 blur-3xl"
+            className="absolute -left-10 -bottom-10 h-24 w-24 sm:h-32 sm:w-32 rounded-full bg-emerald-300/40 blur-3xl"
             aria-hidden
           />
 
           <div className="relative">
-            <div className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">
+            <div className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-2.5 sm:px-3 py-1 text-[10px] sm:text-xs font-bold uppercase tracking-wide text-white">
               <span
                 className="h-1.5 w-1.5 rounded-full bg-white animate-pulse"
                 aria-hidden
               />
               Rekomendasi
             </div>
-            <h2 className="mt-3 text-2xl font-bold text-zinc-900 sm:text-3xl">
+            <h2 className="mt-3 text-lg sm:text-2xl md:text-3xl font-bold text-zinc-900 break-words">
               CV kamu bisa naik {improvementRoom} poin lagi 🚀
             </h2>
-            <p className="mt-2 text-sm text-zinc-700 sm:text-base">
+            <p className="mt-2 text-sm sm:text-base text-zinc-700 break-words">
               Kami udah catat {result.subScores.filter((s) => s.status === "poor").length}
               {" "}aspek yang perlu diperbaiki. Mau langsung perbaiki sekarang? Builder CVKu bakal
               prefill CV kamu + kasih saran AI real-time per kalimat.
@@ -363,9 +367,9 @@ function ResultSection({
             <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
               <Link
                 href={builderHref}
-                className="group relative inline-flex flex-1 items-center justify-center gap-2 overflow-hidden rounded-lg bg-emerald-700 px-6 py-3.5 text-base font-bold text-white shadow-md transition hover:bg-emerald-800 hover:shadow-lg active:scale-[0.99] sm:flex-none sm:px-8"
+                className="group relative inline-flex w-full sm:w-auto items-center justify-center gap-2 overflow-hidden rounded-lg bg-emerald-700 px-5 sm:px-6 md:px-8 py-3 sm:py-3.5 text-sm sm:text-base font-bold text-white shadow-md transition hover:bg-emerald-800 hover:shadow-lg active:scale-[0.99]"
               >
-                <span className="relative z-10 inline-flex items-center gap-2">
+                <span className="relative z-10 inline-flex items-center justify-center gap-2">
                   <svg
                     width="20"
                     height="20"
@@ -404,13 +408,13 @@ function ResultSection({
               <button
                 type="button"
                 onClick={onReset}
-                className="rounded-lg border border-zinc-300 bg-white px-5 py-3 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-50"
+                className="w-full sm:w-auto rounded-lg border border-zinc-300 bg-white px-4 sm:px-5 py-3 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-50"
               >
                 Cek CV lain dulu
               </button>
             </div>
 
-            <p className="mt-4 text-xs text-zinc-500">
+            <p className="mt-4 text-[11px] sm:text-xs text-zinc-500">
               Gratis • Tanpa login • CV kamu tidak disimpan ke server kami
             </p>
           </div>
