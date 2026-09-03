@@ -63,7 +63,8 @@ jobs:
         run: |
           ssh cvku-server << 'EOF'
             set -e
-            cd /home/cvku-ops/cvku
+            # Source code di server ada di /home/roo/Documents/project_joki/cvku/ (owned by cvku-ops)
+            cd /home/roo/Documents/project_joki/cvku
             # Simpan commit sebelumnya untuk rollback
             git rev-parse HEAD > /home/cvku-ops/.last-deployed-commit || true
             # Pull latest
@@ -78,7 +79,7 @@ jobs:
           START_TIME=$(date +%s)
           ssh cvku-server << 'EOF'
             set -e
-            cd /home/cvku-ops/cvku
+            cd /home/roo/Documents/project_joki/cvku
             sudo /usr/bin/docker compose build web
             sudo /usr/bin/docker compose up -d --force-recreate web
             # Tunggu container ready

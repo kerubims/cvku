@@ -49,47 +49,21 @@ cat ~/.ssh/id_ed25519
 # Paste ke value secret di GitHub
 ```
 
-### 3. Setup Server (1-time, ~10 menit)
+# 4. Source code di server SUDAH ADA di:
+#    /home/roo/Documents/project_joki/cvku/ (owned by cvku-ops)
+#    Folder ini adalah git repo dengan remote git@github.com:kerubims/cvku.git
+#    Yang perlu dibuat hanya /home/cvku-ops/backups/
 
-Jalankan via SSH ke server (sebagai user `roo` atau punya akses root):
-
-```bash
-# Login ke server
-ssh roo@192.168.1.89
-
-# 1. Buat folder untuk cvku-ops
-sudo mkdir -p /home/cvku-ops/cvku
-sudo chown cvku-ops:cvku-ops /home/cvku-ops/cvku
-
-# 2. Copy .env dari /home/roo ke /home/cvku-ops
-sudo cp /home/roo/Documents/project_joki/cvku/.env /home/cvku-ops/cvku/.env
-sudo chown cvku-ops:cvku-ops /home/cvku-ops/cvku/.env
-sudo chmod 600 /home/cvku-ops/cvku/.env
-
-# 3. Buat folder backups
+# 1. Buat folder backups (kalau belum ada)
 sudo mkdir -p /home/cvku-ops/backups
 sudo chown cvku-ops:cvku-ops /home/cvku-ops/backups
 
-# 4. Switch ke cvku-ops dan git clone
-sudo su - cvku-ops
-cd /home/cvku-ops/cvku
-git clone https://github.com/kerubims/cvku.git .
+# 2. (Optional) Switch remote ke SSH supaya git pull di CI ga butuh password
+sudo su - cvku-ops -c "cd /home/roo/Documents/project_joki/cvku && git remote set-url origin git@github.com:kerubims/cvku.git"
 
-# 5. Setup git config untuk cvku-ops
-git config user.email "cvku-ops@cvku.ksm.web.id"
-git config user.name "CVKu Deploy Bot"
-
-# 6. Test build manual
-cd /home/cvku-ops/cvku
-sudo /usr/bin/docker compose build web
-sudo /usr/bin/docker compose up -d --force-recreate web
-sleep 15
-curl -fsS http://127.0.0.1:9013/ -o /dev/null && echo "✅ Container OK"
-
-exit
+# 3. Test docker compose manual (verifikasi server masih bisa build)
+sudo su - cvku-ops -c "cd /home/roo/Documents/project_joki/cvku && sudo /usr/bin/docker compose ps"
 ```
-
-**PENTING**: Pastikan `docker compose down` di `/home/roo/...` **TIDAK dijalankan** selama transisi, supaya production tetap hidup.
 
 ### 4. Test CI/CD (5 menit)
 
