@@ -1,0 +1,155 @@
+name: Deploy to Production
+
+# Auto-deploy ke 192.168.1.89 saat push ke main
+# Steps: backup database, git pull, docker compose rebuild, health check
+# Notifikasi: GitHub Actions UI + (optional) GitHub Issue auto-create on failure
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Alasan manual deploy (optional)'
+        required: false
+        default: 'Manual trigger from GitHub Actions'
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false  # JANGAN cancel deploy yang sedang jalan
+
+jobs:
+  deploy:
+    name: Backup + Deploy + Verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      # === STEP 1: SETUP SSH ===
+      - name: Setup SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          known_hosts: ${{ secrets.SERVER_SSH_KNOWN_HOSTS }}
+          config: |
+            Host cvku-server
+              HostName ${{ secrets.SERVER_HOST }}
+              User ${{ secrets.SERVER_USER }}
+              StrictHostKeyChecking no
+              UserKnownHostsFile=/dev/null
+              LogLevel ERROR
+
+      # === STEP 2: BACKUP DATABASE ===
+      - name: Backup database (pg_dump)
+        id: backup
+        run: |
+          ssh cvku-server << 'EOF'
+            set -e
+            BACKUP_DIR="/home/cvku-ops/backups"
+            mkdir -p "$BACKUP_DIR"
+            BACKUP_FILE="cvku-$(date +%Y-%m-%d_%H%M%S).sql"
+            CONTAINER_ID=$(docker ps -q -f name=cvku-db)
+            docker exec "$CONTAINER_ID" pg_dump -U cvku cvku > "$BACKUP_DIR/$BACKUP_FILE"
+            gzip "$BACKUP_DIR/$BACKUP_FILE"
+            BACKUP_SIZE=$(du -h "$BACKUP_DIR/$BACKUP_FILE.gz" | cut -f1)
+            # Keep only last 30 backups
+            ls -t "$BACKUP_DIR"/cvku-*.sql.gz | tail -n +31 | xargs -r rm
+            echo "✅ Backup: $BACKUP_DIR/$BACKUP_FILE.gz ($BACKUP_SIZE)"
+            echo "BACKUP_PATH=$BACKUP_DIR/$BACKUP_FILE.gz" >> $GITHUB_ENV
+            echo "BACKUP_SIZE=$BACKUP_SIZE" >> $GITHUB_ENV
+          EOF
+
+      # === STEP 3: GIT PULL ===
+      - name: Pull latest code
+        run: |
+          ssh cvku-server << 'EOF'
+            set -e
+            # Source code di server ada di /home/roo/Documents/project_joki/cvku/ (owned by cvku-ops)
+            cd /home/roo/Documents/project_joki/cvku
+            # Simpan commit sebelumnya untuk rollback
+            git rev-parse HEAD > /home/cvku-ops/.last-deployed-commit || true
+            # Pull latest
+            git fetch origin main
+            git reset --hard origin/main
+            echo "DEPLOYED_SHA=$(git rev-parse HEAD | cut -c1-7)" >> $GITHUB_ENV
+            echo "DEPLOYED_MSG=$(git log -1 --pretty=format:'%s')" >> $GITHUB_ENV
+          EOF
+        # === STEP 4: BUILD & RESTART ===
+      - name: Build & restart containers
+        run: |
+          START_TIME=$(date +%s)
+          ssh cvku-server << 'EOF'
+            set -e
+            cd /home/roo/Documents/project_joki/cvku
+            sudo /usr/bin/docker compose build web
+            sudo /usr/bin/docker compose up -d --force-recreate web
+            # Tunggu container ready
+            sleep 10
+          EOF
+          echo "DEPLOY_START=$START_TIME" >> $GITHUB_ENV
+
+      # === STEP 5: HEALTH CHECK ===
+      - name: Health check
+        id: health
+        run: |
+          for i in 1 2 3 4 5 6; do
+            HTTP_STATUS=$(curl -fsS -o /dev/null -w "%{http_code}" --max-time 10 https://cvku.ksm.web.id/ 2>/dev/null || echo "000")
+            echo "Attempt $i: HTTP $HTTP_STATUS"
+            if [ "$HTTP_STATUS" = "200" ]; then
+              break
+            fi
+            sleep 5
+          done
+          echo "HTTP_STATUS=$HTTP_STATUS" >> $GITHUB_ENV
+          if [ "$HTTP_STATUS" != "200" ]; then
+            echo "❌ Health check failed (HTTP $HTTP_STATUS)"
+            exit 1
+          fi
+          echo "✅ Health check passed"
+
+      # === STEP 6: DURATION ===
+      - name: Calculate duration
+        if: success()
+        run: |
+          END_TIME=$(date +%s)
+          DURATION=$((END_TIME - DEPLOY_START))
+          DURATION_MIN=$((DURATION / 60))
+          DURATION_SEC=$((DURATION % 60))
+          echo "⏱️  Deploy duration: ${DURATION_MIN}m ${DURATION_SEC}s"
+          echo "DEPLOY_DURATION=${DURATION_MIN}m ${DURATION_SEC}s" >> $GITHUB_ENV
+
+      # === STEP 7: SUMMARY (Success) ===
+      - name: Deploy summary
+        if: success()
+        run: |
+          echo "## ✅ CVKu Deploy Sukses" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **URL:** https://cvku.ksm.web.id" >> $GITHUB_STEP_SUMMARY
+          echo "- **HTTP:** $HTTP_STATUS" >> $GITHUB_STEP_SUMMARY
+          echo "- **Duration:** $DEPLOY_DURATION" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit:** \`$DEPLOYED_SHA\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Message:** $DEPLOYED_MSG" >> $GITHUB_STEP_SUMMARY
+          echo "- **Backup:** $BACKUP_PATH ($BACKUP_SIZE)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "[Lihat di GitHub Actions](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
+
+      # === STEP 8: SUMMARY (Failure) ===
+      - name: Deploy failure summary
+        if: failure()
+        run: |
+          echo "## ❌ CVKu Deploy GAGAL" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Workflow:** ${{ github.workflow }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Run:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Last commit:** \`${DEPLOYED_SHA:-unknown}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "⚠️ Production mungkin broken. Cek logs di link di atas." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Rollback manual (kalau perlu):" >> $GITHUB_STEP_SUMMARY
+          echo '```bash' >> $GITHUB_STEP_SUMMARY
+          echo "ssh cvku-ops@192.168.1.89" >> $GITHUB_STEP_SUMMARY
+          echo "cd /home/cvku-ops/cvku" >> $GITHUB_STEP_SUMMARY
+          echo "cat /home/cvku-ops/.last-deployed-commit" >> $GITHUB_STEP_SUMMARY
+          echo "git checkout \$(cat /home/cvku-ops/.last-deployed-commit)" >> $GITHUB_STEP_SUMMARY
+          echo "sudo /usr/bin/docker compose build web" >> $GITHUB_STEP_SUMMARY
+          echo "sudo /usr/bin/docker compose up -d --force-recreate web" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY

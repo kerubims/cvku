@@ -1,0 +1,60 @@
+name: CI
+
+# TSC + lint + build otomatis setiap push/PR
+# Tidak deploy — hanya cek code quality
+
+on:
+  push:
+    branches: [main, 'feature/**', 'fix/**', 'chore/**']
+  pull_request:
+    branches: [main]
+
+# Cancel in-progress runs untuk branch yang sama
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: TypeScript + Lint + Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: TypeScript type check
+        run: npx tsc --noEmit
+
+      - name: ESLint
+        run: npm run lint -- --max-warnings=50 || echo "::warning::Lint warnings (non-blocking)"
+
+      - name: Build
+        run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
+          # Mock secrets untuk build success (real secrets di server)
+          NEXT_PUBLIC_SITE_URL: https://cvku.ksm.web.id
+          NOVITA_API_KEY: build-time-mock
+          ADMIN_TOKEN: build-time-mock
+          IRON_SESSION_PASSWORD: build-time-mock-32-chars-minimum-1234
+          POSTGRES_PASSWORD: build-time-mock
+
+      - name: Upload Next.js build output
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nextjs-build-logs
+          path: |
+            .next/
+            *.log
+          retention-days: 3
