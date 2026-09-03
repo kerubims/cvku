@@ -1,12 +1,8 @@
 name: Deploy to Production
 
 # Auto-deploy ke 192.168.1.89 saat push ke main
-# 1. Notif Telegram deploy started
-# 2. Backup database (pg_dump)
-# 3. Notif Telegram backup complete
-# 4. Git pull + docker compose rebuild
-# 5. Health check (curl 200)
-# 6. Notif Telegram deploy success / failure
+# Steps: backup database, git pull, docker compose rebuild, health check
+# Notifikasi: GitHub Actions UI + (optional) GitHub Issue auto-create on failure
 
 on:
   push:
@@ -28,25 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      # === STEP 1: NOTIFY STARTED ===
-      - name: Notify deploy started (Telegram)
-        if: github.event_name == 'push'
-        env:
-          TG_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TG_CHAT: ${{ secrets.TELEGRAM_CHAT_ID }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          COMMIT_SHA=$(echo "$GITHUB_SHA" | cut -c1-7)
-          COMMIT_MSG=$(git log -1 --pretty=format:'%s' || echo "unknown")
-          COMMIT_AUTHOR=$(git log -1 --pretty=format:'%an' || echo "unknown")
-          MESSAGE="🚀 *CVKu deploy dimulai*%0A%0A*Commit:* \`${COMMIT_SHA}\`%0A*Author:* ${COMMIT_AUTHOR}%0A*Message:* ${COMMIT_MSG}%0A%0A⏳ Membangun & deploying..."
-          curl -s "https://api.telegram.org/bot${TG_TOKEN}/sendMessage" \
-            -d "chat_id=${TG_CHAT}" \
-            -d "parse_mode=Markdown" \
-            -d "disable_web_page_preview=true" \
-            -d "text=${MESSAGE}" > /dev/null
-
-      # === STEP 2: SETUP SSH ===
+      # === STEP 1: SETUP SSH ===
       - name: Setup SSH key
         uses: shimataro/ssh-key-action@v2
         with:
@@ -60,7 +38,7 @@ jobs:
               UserKnownHostsFile=/dev/null
               LogLevel ERROR
 
-      # === STEP 3: BACKUP DATABASE ===
+      # === STEP 2: BACKUP DATABASE ===
       - name: Backup database (pg_dump)
         id: backup
         run: |
@@ -73,24 +51,14 @@ jobs:
             docker exec "$CONTAINER_ID" pg_dump -U cvku cvku > "$BACKUP_DIR/$BACKUP_FILE"
             gzip "$BACKUP_DIR/$BACKUP_FILE"
             BACKUP_SIZE=$(du -h "$BACKUP_DIR/$BACKUP_FILE.gz" | cut -f1)
+            # Keep only last 30 backups
             ls -t "$BACKUP_DIR"/cvku-*.sql.gz | tail -n +31 | xargs -r rm
+            echo "✅ Backup: $BACKUP_DIR/$BACKUP_FILE.gz ($BACKUP_SIZE)"
             echo "BACKUP_PATH=$BACKUP_DIR/$BACKUP_FILE.gz" >> $GITHUB_ENV
             echo "BACKUP_SIZE=$BACKUP_SIZE" >> $GITHUB_ENV
           EOF
 
-      - name: Notify backup complete (Telegram)
-        env:
-          TG_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TG_CHAT: ${{ secrets.TELEGRAM_CHAT_ID }}
-        run: |
-          FILENAME=$(basename "$BACKUP_PATH")
-          MESSAGE="💾 *Database backup selesai*%0A%0A*File:* \`${FILENAME}\`%0A*Size:* ${BACKUP_SIZE}%0A*Location:* \`/home/cvku-ops/backups/\`"
-          curl -s "https://api.telegram.org/bot${TG_TOKEN}/sendMessage" \
-            -d "chat_id=${TG_CHAT}" \
-            -d "parse_mode=Markdown" \
-            -d "text=${MESSAGE}" > /dev/null
-
-      # === STEP 4: GIT PULL + DEPLOY ===
+      # === STEP 3: GIT PULL ===
       - name: Pull latest code
         run: |
           ssh cvku-server << 'EOF'
@@ -104,7 +72,7 @@ jobs:
             echo "DEPLOYED_SHA=$(git rev-parse HEAD | cut -c1-7)" >> $GITHUB_ENV
             echo "DEPLOYED_MSG=$(git log -1 --pretty=format:'%s')" >> $GITHUB_ENV
           EOF
-
+        # === STEP 4: BUILD & RESTART ===
       - name: Build & restart containers
         run: |
           START_TIME=$(date +%s)
@@ -137,7 +105,7 @@ jobs:
           fi
           echo "✅ Health check passed"
 
-      # === STEP 6: DEPLOY DURATION ===
+      # === STEP 6: DURATION ===
       - name: Calculate duration
         if: success()
         run: |
@@ -145,34 +113,42 @@ jobs:
           DURATION=$((END_TIME - DEPLOY_START))
           DURATION_MIN=$((DURATION / 60))
           DURATION_SEC=$((DURATION % 60))
+          echo "⏱️  Deploy duration: ${DURATION_MIN}m ${DURATION_SEC}s"
           echo "DEPLOY_DURATION=${DURATION_MIN}m ${DURATION_SEC}s" >> $GITHUB_ENV
 
-      # === STEP 7: NOTIFY SUCCESS ===
-      - name: Notify deploy success (Telegram)
+      # === STEP 7: SUMMARY (Success) ===
+      - name: Deploy summary
         if: success()
-        env:
-          TG_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TG_CHAT: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
-          COMMIT_URL="${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}"
-          MESSAGE="✅ *CVKu deploy sukses*%0A%0A*URL:* https://cvku.ksm.web.id%0A*HTTP:* ${HTTP_STATUS}%0A*Duration:* ${DEPLOY_DURATION}%0A*Commit:* [${DEPLOYED_SHA}](${COMMIT_URL})%0A*Message:* ${DEPLOYED_MSG}"
-          curl -s "https://api.telegram.org/bot${TG_TOKEN}/sendMessage" \
-            -d "chat_id=${TG_CHAT}" \
-            -d "parse_mode=Markdown" \
-            -d "disable_web_page_preview=true" \
-            -d "text=${MESSAGE}" > /dev/null
+          echo "## ✅ CVKu Deploy Sukses" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **URL:** https://cvku.ksm.web.id" >> $GITHUB_STEP_SUMMARY
+          echo "- **HTTP:** $HTTP_STATUS" >> $GITHUB_STEP_SUMMARY
+          echo "- **Duration:** $DEPLOY_DURATION" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit:** \`$DEPLOYED_SHA\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Message:** $DEPLOYED_MSG" >> $GITHUB_STEP_SUMMARY
+          echo "- **Backup:** $BACKUP_PATH ($BACKUP_SIZE)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "[Lihat di GitHub Actions](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
 
-      # === STEP 8: NOTIFY FAILURE ===
-      - name: Notify deploy failure (Telegram)
+      # === STEP 8: SUMMARY (Failure) ===
+      - name: Deploy failure summary
         if: failure()
-        env:
-          TG_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TG_CHAT: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
-          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          MESSAGE="❌ *CVKu deploy GAGAL*%0A%0A*Workflow:* ${{ github.workflow }}%0A*Run:* [#${{ github.run_id }}](${RUN_URL})%0A*Last commit:* \`${DEPLOYED_SHA:-unknown}\`%0A%0A⚠️ Production mungkin broken. Cek logs:${RUN_URL}"
-          curl -s "https://api.telegram.org/bot${TG_TOKEN}/sendMessage" \
-            -d "chat_id=${TG_CHAT}" \
-            -d "parse_mode=Markdown" \
-            -d "disable_web_page_preview=true" \
-            -d "text=${MESSAGE}" > /dev/null
+          echo "## ❌ CVKu Deploy GAGAL" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Workflow:** ${{ github.workflow }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Run:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Last commit:** \`${DEPLOYED_SHA:-unknown}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "⚠️ Production mungkin broken. Cek logs di link di atas." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Rollback manual (kalau perlu):" >> $GITHUB_STEP_SUMMARY
+          echo '```bash' >> $GITHUB_STEP_SUMMARY
+          echo "ssh cvku-ops@192.168.1.89" >> $GITHUB_STEP_SUMMARY
+          echo "cd /home/cvku-ops/cvku" >> $GITHUB_STEP_SUMMARY
+          echo "cat /home/cvku-ops/.last-deployed-commit" >> $GITHUB_STEP_SUMMARY
+          echo "git checkout \$(cat /home/cvku-ops/.last-deployed-commit)" >> $GITHUB_STEP_SUMMARY
+          echo "sudo /usr/bin/docker compose build web" >> $GITHUB_STEP_SUMMARY
+          echo "sudo /usr/bin/docker compose up -d --force-recreate web" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
