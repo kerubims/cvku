@@ -16,6 +16,7 @@ import { generateFAQs } from "@/lib/contoh-cv/faq-generator";
 import { JsonLd } from "@/components/json-ld";
 import { CvDocument } from "@/components/cv-document";
 import { FullscreenButton } from "@/components/fullscreen-button";
+import { LastUpdatedBadge } from "@/components/last-updated-badge";
 
 export const dynamicParams = false;
 
@@ -107,6 +108,17 @@ export default async function ContohCVDetail({
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-zinc-900">
             {cv.h1}
           </h1>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <LastUpdatedBadge date={cv.modifiedTime} />
+            <span className="text-xs text-zinc-500">
+              · Dipublikasikan{" "}
+              {new Date(cv.publishedTime).toLocaleDateString("id-ID", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              })}
+            </span>
+          </div>
           <div className="mt-4 text-zinc-600 space-y-3">
             {cv.intro.map((p, i) => (
               <p key={i}>{p}</p>
