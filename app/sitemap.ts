@@ -29,5 +29,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency: "monthly" as const,
     priority: 0.8,
   }));
-  return [landing, contohHub, privasi, ...contoh];
+  const atsChecker = {
+    url: `${BASE}/ats-checker`,
+    lastModified: now,
+    changeFrequency: "weekly" as const,
+    priority: 0.85,
+  };
+  return [landing, contohHub, atsChecker, privasi, ...contoh];
 }
