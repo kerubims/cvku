@@ -52,6 +52,23 @@ export const CONTOH_CV_BATCH_30: ContohCV[] = [
           "AWS Certified Cloud Practitioner, Google IT Automation, Dicoding — yang begini nilainya. Hindari 'Sertifikasi Microsoft Office' untuk posisi tech.",
       },
     ],
+    faqs: [
+      {
+        question: "Programmer fresh graduate yang belum pernah kerja profesional, gimana cara menulis CV?",
+        answer:
+          "Tonjolkan 3 hal: (1) Project pribadi / kontribusi open source dengan link GitHub — recruiter tech akan cek repo kamu. (2) Magang atau freelance, sekecil apa pun (3–6 bulan sudah cukup). (3) Tech stack spesifik yang dikuasai, bukan 'mengerti JavaScript' tapi 'Node.js + Express + PostgreSQL selama 2 tahun project pribadi'. Recruiter tech bisa bedakan kandidat yang cuma ikut bootcamp vs yang benar-benar ngoding.",
+      },
+      {
+        question: "Apakah perlu cantumkan nilai TOEFL atau certification tech di CV?",
+        answer:
+          "Untuk apply ke tech company lokal, TOEFL tidak wajib. Yang lebih penting: sertifikasi tech (AWS, Google Cloud, Azure, atau platform-specific) dan kontribusi open source. Cantumkan URL repository di header CV, tepat di bawah email. Kalau repo private, tulis 'Available upon request' atau pindahkan ke portofolio publik yang bisa di-share.",
+      },
+      {
+        question: "Project pribadi di CV programmer perlu penjelasan sedetail apa?",
+        answer:
+          "Sebutkan: nama project, tech stack (bahasa + framework + database), problem yang diselesaikan, dan metric kalau ada. Contoh bagus: 'REST API untuk inventory management, Node.js + PostgreSQL, handle 10.000+ request per hari, response time <200ms'. Hindari: 'Website toko online pakai React' — terlalu generic. Detail 1–2 baris per project sudah cukup, sisanya ada di repository.",
+      },
+    ],
     cv: {
       nama: "Rizky Ananda Pratama",
       jabatan: "Backend Developer — Fresh Graduate",
@@ -148,6 +165,23 @@ export const CONTOH_CV_BATCH_30: ContohCV[] = [
         judul: "Project pribadi tetap valid",
         isi:
           "Analisis dataset COVID Indonesia, bikin dashboard di Looker, publish di LinkedIn = boleh masuk CV kalau ngga ada pengalaman kerja.",
+      },
+    ],
+    faqs: [
+      {
+        question: "Data analyst dengan pengalaman 1–2 tahun, gimana cara menonjol di CV?",
+        answer:
+          "Fokus ke business impact, bukan cuma tools. Contoh: 'Membangun cohort analysis yang mengidentifikasi 15% customer churn di Q3, save Rp 1.2 M/bulan lewat retargeting campaign'. Recruiter data analyst sudah bosan dengan 'membuat dashboard mingguan' — yang membedakan adalah insight bisnis dan rekomendasi yang kamu hasilkan. Cantumkan 2–3 project dengan angka spesifik.",
+      },
+      {
+        question: "Tools apa yang wajib ada di CV data analyst?",
+        answer:
+          "Wajib: SQL (PostgreSQL/MySQL/BigQuery), Python (pandas/numpy), dan 1 tools visualisasi (Tableau, Power BI, atau Looker). Tambahkan: Excel/Google Sheets advanced, R (kalau dipakai), dan tools big data (Spark, dbt, Snowflake) kalau ada. Cantumkan juga level kemahiran — 'SQL (advanced), Python (intermediate), Tableau (intermediate)' lebih jujur daripada 'SQL, Python, Tableau' tanpa konteks.",
+      },
+      {
+        question: "Apakah perlu portfolio project jika sudah punya pengalaman kerja sebagai data analyst?",
+        answer:
+          "Kurang wajib dibanding fresh graduate, tapi sangat membantu. Cantumkan 2–3 project sampingan (analisis publik dataset, Kaggle, atau kompetisi analisis) di section 'Side Projects'. Untuk professional dengan 3+ tahun pengalaman, portfolio boleh skip dan fokus ke track record di kantor. Tapi kalau kamu fresh graduate atau career switcher, portfolio itu wajib.",
       },
     ],
     cv: {
@@ -352,6 +386,23 @@ export const CONTOH_CV_BATCH_30: ContohCV[] = [
         judul: "Sertifikasi Meta/Google wajib",
         isi:
           "Meta Blueprint Certification, Google Ads Certification, TikTok Academy — gratis dan cepat, wajib punya minimal 1.",
+      },
+    ],
+    faqs: [
+      {
+        question: "Digital marketing specialist, metric apa yang paling penting di CV?",
+        answer:
+          "Recruiter marketing fokus ke business outcome, bukan vanity metric. Cantumkan: ROAS (Return on Ad Spend), CPA (Cost per Acquisition), conversion rate, dan revenue impact. Contoh: 'Meningkatkan ROAS dari 3.2x menjadi 5.8x lewat optimasi Meta Ads dalam 3 bulan'. Hindari cuma menulis 'membuat campaign Instagram' tanpa angka — itu tidak menunjukkan value.",
+      },
+      {
+        question: "Platform apa yang perlu ditulis di CV digital marketing?",
+        answer:
+          "Cantumkan paid, organic, dan owned media secara terpisah. Paid: Meta Ads, Google Ads, TikTok Ads, LinkedIn Ads. Organic: SEO, content marketing, social media. Owned: email marketing (Mailchimp, Brevo), CRM. Tulis level pengalaman: 'Meta Ads (advanced), SEO (intermediate), Email Marketing (basic)'. Recruiter akan bedakan generalist vs specialist lewat sini.",
+      },
+      {
+        question: "Apakah perlu portfolio campaign di CV digital marketing?",
+        answer:
+          "Sangat disarankan, terutama untuk fresh graduate. Cantumkan 2–3 campaign terbaik (milik klien atau pribadi) dengan ringkasan: objective, strategi, eksekusi, dan hasil. Tulis di section 'Featured Campaigns' dengan link ke case study lengkap. Untuk yang sudah 3+ tahun pengalaman, portfolio boleh di-skip dan fokus ke track record di kantor.",
       },
     ],
     cv: {
@@ -1139,6 +1190,23 @@ export const CONTOH_CV_BATCH_30: ContohCV[] = [
           "BLS (Basic Life Support), ACLS (Advanced Cardiac Life Support), BTCLS, ICU Nursing — semakin banyak, semakin stand out.",
       },
     ],
+    faqs: [
+      {
+        question: "Pengalaman perawat ICU dan IGD, gimana cara menonjolkan di CV?",
+        answer:
+          "Cantumkan sertifikasi spesifik: BLS (Basic Life Support), ACLS (Advanced Cardiac Life Support), atau PPGD (Penanganan Pasien Gawat Darurat) — semua dihitung nilai plus. Tulis RS tempat kerja, unit spesifik (ICU, IGD, NICU, dll), dan durasi. Recruiter RS besar biasanya filter berdasarkan pengalaman di unit yang relevan dengan posisi yang dibuka. Tambahkan juga jumlah tindakan medis yang kamu kuasai (mis. ventilator, EKG, injeksi).",
+      },
+      {
+        question: "STR perawat harus aktif untuk apply kerja?",
+        answer:
+          "Wajib aktif, sama seperti dokter. Cantumkan nomor STR, masa berlaku, dan pendidikan terakhir (D3 Keperawatan, S1 Ners, atau Ners). Beberapa RS besar (terutama RS tipe A dan B) tidak menerima perawat dengan STR yang akan habis dalam 6 bulan. Kalau STR sedang proses perpanjangan, tulis 'STR dalam proses perpanjangan, berlaku hingga [tanggal]' supaya jelas statusnya.",
+      },
+      {
+        question: "Perawat fresh graduate tanpa pengalaman kerja, gimana adaptasi CV?",
+        answer:
+          "Fokus ke praktik klinik saat pendidikan, magang, dan sertifikasi. Tulis RS atau klinik tempat praktik, durasi, dan unit spesifik. Cantumkan juga tindakan medis yang sudah pernah kamu lakukan (kalau ada data). Pengalaman volunteer medis atau kegiatan kampus terkait keperawatan (BEM, himpunan, atau seminar) bisa ditambahkan. Recruiter tau fresh graduate belum pengalaman kerja formal, jadi yang dilihat adalah skill dan inisiatif.",
+      },
+    ],
     cv: {
       nama: "Maria Ulfah S.Kep., Ners",
       jabatan: "Perawat ICU — 3 Tahun Pengalaman",
@@ -1319,6 +1387,23 @@ export const CONTOH_CV_BATCH_30: ContohCV[] = [
           "Punya publikasi jurnal, presentasi poster, atau ikut penelitian? Tulis. Untuk spesialis, ini wajib banget.",
       },
     ],
+    faqs: [
+      {
+        question: "STR dan SIP dokter wajib dicantumkan di CV?",
+        answer:
+          "Wajib, cantumkan di bagian paling atas, sebelum pengalaman kerja. Tulis nomor STR, masa berlaku, dan jenjang (dr., drg., dr.Sp.X). SIP (Surat Izin Praktik) boleh ditambahkan kalau sudah ada. Recruiter RS dan klinik selalu verifikasi STR aktif ke Konsil Kedokteran Indonesia. Tanpa STR aktif, lamaran langsung gugur di tahap administrasi.",
+      },
+      {
+        question: "Dokter internship atau co-assistant, gimana cara menulis pengalamannya di CV?",
+        answer:
+          "Cantumkan nama RS, departemen, dan durasi. Tulis juga jumlah kasus yang kamu tangani (kalau ada data) atau area spesifik. Contoh: 'Co-assistant Departemen Bedah RS Sardjito, Yogyakarta, 6 bulan — handle 50+ kasus bedah minor dan visite 20+ pasien rawat inap'. Hindari cuma 'Magang di RS X' — itu terlalu generic dan recruiter tidak tau level kontribusi kamu.",
+      },
+      {
+        question: "Dokter fresh graduate yang ingin apply RS, harus menonjolkan apa di CV?",
+        answer:
+          "Tiga hal: (1) STR aktif dan SIP (kalau ada) di header, (2) Pengalaman internship/co-assistant dengan angka kasus, (3) Publikasi atau riset (jurnal, poster, atau presentasi kasus). Tambahkan juga pengalaman volunteer medis (bakti sosial, bencana, atau community service) dan organisasi profesi (IDI, PDGI, atau PPNI sesuai spesialisasi). Recruiter RS besar biasanya lihat track record akademis dan kontribusi sosial.",
+      },
+    ],
     cv: {
       nama: "dr. Bramantya Surya Nugraha",
       jabatan: "Dokter Umum — 1 Tahun Pengalaman",
@@ -1406,6 +1491,23 @@ export const CONTOH_CV_BATCH_30: ContohCV[] = [
         judul: "No foto, no tanggal lahir",
         isi:
           "CV untuk pasar global (US, EU, SG) JANGAN cantumkan foto, tanggal lahir, status pernikahan, atau gender. Itu diskriminasi di sana.",
+      },
+    ],
+    faqs: [
+      {
+        question: "CV bahasa Inggris untuk apply kerja di Indonesia atau luar negeri?",
+        answer:
+          "Bisa dua-duanya, tapi ada perbedaan. Untuk apply di Indonesia: boleh pakai format 1 kolom, font standar, dan cantumkan foto. Untuk apply di luar negeri (US, UK, Australia): tidak pakai foto, no tanggal lahir, no jenis kelamin, dan no status pernikahan. Recruiter global fokus ke experience, skills, dan impact — bukan data personal yang bisa bikin bias.",
+      },
+      {
+        question: "Apakah perlu cantumkan foto di CV bahasa Inggris?",
+        answer:
+          "Tergantung negara. Di AS, UK, Australia, Kanada, dan sebagian besar negara Eropa, foto TIDAK disarankan (bisa jadi alasan diskriminasi). Di Asia Tenggara, Timur Tengah, dan beberapa negara Eropa Timur, foto masih umum. Untuk apply ke Singapura, Malaysia, dan Hong Kong, cantumkan foto. Untuk apply ke job portal global (LinkedIn, Indeed, Glassdoor), skip foto.",
+      },
+      {
+        question: "Skill bahasa Inggris di CV, bagaimana menulis level proficiency?",
+        answer:
+          "Hindari klaim 'fluent' atau 'native' kalau bukan native speaker. Gunakan skala CEFR (A1, A2, B1, B2, C1, C2) atau self-rating dengan sertifikat. Contoh: 'English: Professional working proficiency (TOEFL iBT 95)'. Cantumkan juga skor TOEFL/IELTS/TOEIC kalau ada — itu lebih objektif daripada klaim sendiri. Untuk fresh graduate yang baru lulus, tulis 'English: Business working proficiency (TOEFL ITP 550)'.",
       },
     ],
     cv: {
@@ -1841,6 +1943,23 @@ export const CONTOH_CV_BATCH_30: ContohCV[] = [
         judul: "Sertifikasi & kursus pendek",
         isi:
           "Coursera, Udemy, Dicoding, Google Certificate — yang 2-6 bulan sangat dihargai HRD. Tulis dengan platform & tahun.",
+      },
+    ],
+    faqs: [
+      {
+        question: "Saya fresh graduate tanpa pengalaman kerja sama sekali, gimana caranya bikin CV?",
+        answer:
+          "Tetap bisa bikin CV yang kuat. Yang kamu punya: organisasi kampus, kepanitiaan, project akademik, volunteer, dan skill teknis. Tulis semuanya dengan hasil terukur: 'Koordinator Volunteer Bakti Sosial 2023, memimpin 25 Relawan untuk distribusi 500 paket ke 4 desa'. Recruiter tau fresh graduate belum pengalaman kerja, jadi fokus ke inisiatif dan kontribusi nyata.",
+      },
+      {
+        question: "Kalau IPK rendah dan tidak ada pengalaman organisasi, CV fresh graduate masih bisa dilamar?",
+        answer:
+          "Bisa, tapi realistis — peluang di perusahaan besar (konsultan, Big 4, bank) lebih kecil. Fokuskan apply ke startup, UMKM, dan perusahaan yang lebih看重 skill. Sambil apply, tambahkan skill lewat bootcamp, kursus online, atau project pribadi. Setelah 6–12 bulan pengalaman freelance / project, baru re-apply ke target yang lebih ambisius.",
+      },
+      {
+        question: "Apakah job fair atau campus hiring lebih efektif daripada apply online untuk fresh graduate?",
+        answer:
+          "Untuk fresh graduate, job fair dan campus hiring biasanya lebih efektif — recruiter lebih terbuka melihat kandidat tanpa pengalaman dan ada booth interview langsung. Tapi jangan skip apply online, karena banyak perusahaan (terutama startup dan tech) tidak ikut job fair. Siapkan 2 versi CV: satu untuk job fair (lebih visual, bisa lebih panjang), satu untuk ATS online (standar, ATS-friendly).",
       },
     ],
     cv: {

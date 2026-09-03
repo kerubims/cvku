@@ -235,6 +235,23 @@ export const CONTOH_CV_LIST: ContohCV[] = [
           "Fresh graduate S1 yang CV-nya 2 halaman biasanya menulis hal yang tidak perlu. 1 halaman > CV panjang lebar.",
       },
     ],
+    faqs: [
+      {
+        question: "Fresh graduate S1 yang belum pernah kerja, gimana cara menulis CV yang kuat?",
+        answer:
+          "Fokus ke 3 hal: (1) Pengalaman organisasi dengan hasil terukur — 'Ketua BEM 2022, memimpin 12 panitia untuk acara 500+ peserta' lebih kuat dari 'aktif di BEM'. (2) Magang dengan dampak — 'Input data penjualan 200+ SKU, akurasi 99% selama 3 bulan'. (3) Proyek akademik / skripsi yang relevan dengan posisi yang dilamar. Recruiter tau fresh graduate belum punya pengalaman kerja formal, jadi yang dilihat adalah potensi dan inisiatif.",
+      },
+      {
+        question: "IPK rendah, gimana cara menulis di CV?",
+        answer:
+          "Kalau IPK di atas 3.00, cantumkan. Di bawah 3.00, lebih baik tidak cantumkan dan tonjolkan skill, proyek, atau sertifikasi. Beberapa perusahaan (terutama konsultan, bank, Big 4) memang filter berdasarkan IPK minimal 3.00–3.25. Tapi banyak startup, UMKM, dan perusahaan teknologi yang lebih看重 skill dan attitude daripada IPK. Riset perusahaan dulu sebelum decide.",
+      },
+      {
+        question: "Berapa lama waktu yang ideal untuk magang di CV fresh graduate S1?",
+        answer:
+          "Magang 3–6 bulan ideal. Lebih pendek dari 1 bulan biasanya terlalu singkat untuk kontribusi berarti, lebih dari 1 tahun mulai terlihat seperti pekerjaan penuh. Cantumkan durasi, nama perusahaan, dan kontribusi utama. Magang di startup teknologi atau konsultan biasanya lebih dihargai daripada magang di perusahaan besar tapi pasif — recruiter lihat apa yang kamu kerjakan, bukan di mana.",
+      },
+    ],
     cv: {
       nama: "Rizky Maulana",
       jabatan: "Marketing Staff / Business Development",
@@ -645,6 +662,23 @@ export const CONTOH_CV_LIST: ContohCV[] = [
         judul: "Hindari 'fresh graduate yang siap belajar'",
         isi:
           "HRD BUMN sudah bosan. Tulis 'memimpin divisi X untuk event Y, hasil Z'.",
+      },
+    ],
+    faqs: [
+      {
+        question: "IPK berapa yang aman untuk apply BUMN?",
+        answer:
+          "IPK aman untuk BUMN tier-1 (Bank Mandiri, BNI, Pertamina, Telkom) minimal 3.00, dengan rata-rata pelamar yang lolos di 3.25–3.75. BUMN tier-2 dan tier-3 biasanya menerima IPK 2.75–3.00. Cantumkan IPK di header CV, tepat di bawah nama universitas. Kalau di bawah 3.00, masih bisa apply tapi tonjolkan pengalaman organisasi, magang, dan sertifikat untuk menutupi.",
+      },
+      {
+        question: "Tes BUMN apa saja yang harus disiapkan?",
+        answer:
+          "Terdiri dari 4 tahap: (1) Seleksi Administrasi (CV screening otomatis), (2) Tes Potensi Akademik (TPA) — verbal, numerik, figural, (3) Tes Bahasa Inggris — TOEFL-like atau TOEIC, (4) Wawancara HRD & User. Beberapa BUMN menambahkan tes khusus (akuntansi untuk finance, psikotes untuk HC). Latihan soal TPA dari BKN atau platform lainnya penting untuk tahap 2.",
+      },
+      {
+        question: "Bolehkah pakai template CV yang sama untuk apply beberapa BUMN?",
+        answer:
+          "Boleh, asalkan struktur sama. Yang boleh beda: ringkasan profesional (sesuaikan dengan posisi yang dilamar), urutan skill (prioritaskan yang relevan), dan pengalaman yang ditonjolkan (yang paling relevan di atas). BUMN beda industri (bank vs telekomunikasi) biasanya beda prioritas — bank suka finance skill, telekomunikasi suka tech skill.",
       },
     ],
     cv: {
