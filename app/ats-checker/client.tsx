@@ -101,10 +101,10 @@ export function AtsCheckerClient() {
   }, []);
 
   return (
-    <div className="mx-auto w-full max-w-4xl px-4 sm:px-6 py-10 sm:py-16">
+    <div className="mx-auto w-full max-w-4xl px-4 sm:px-6 py-6 sm:py-16">
       {/* Header */}
-      <header className="mb-6 sm:mb-8 text-center">
-        <p className="text-xs sm:text-sm font-medium text-emerald-700 mb-2">
+      <header className="mb-5 sm:mb-8 text-center">
+        <p className="text-xs sm:text-sm font-medium text-emerald-700 mb-1.5 sm:mb-2">
           Gratis • Tanpa Login • Hasil Instan
         </p>
         <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-zinc-900">
@@ -128,7 +128,7 @@ export function AtsCheckerClient() {
 
       {/* Form */}
       {status !== "success" && status !== "loading" && (
-        <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           {/* Textarea */}
           <div>
             <label htmlFor="cv-text" className="block text-sm font-semibold text-zinc-900 mb-2">
@@ -164,16 +164,32 @@ export function AtsCheckerClient() {
             <label className="block text-sm font-semibold text-zinc-900 mb-2">
               2. Upload file (PDF / DOCX, max 5MB)
             </label>
-            <div className="flex items-center gap-3">
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".pdf,.docx,.doc,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                onChange={handleFileChange}
-                disabled={false}
-                className="block w-full min-w-0 text-sm text-zinc-600 file:mr-3 file:rounded-md file:border-0 file:bg-emerald-50 file:px-3 sm:file:px-4 file:py-2 file:text-sm file:font-semibold file:text-emerald-700 hover:file:bg-emerald-100 disabled:opacity-50"
-              />
-              {file && (
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf,.docx,.doc,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+              onChange={handleFileChange}
+              disabled={false}
+              className="block w-full min-w-0 text-sm text-zinc-600 file:mr-2 sm:file:mr-3 file:rounded-md file:border-0 file:bg-emerald-50 file:px-3 file:py-2 file:text-xs sm:file:text-sm file:font-semibold file:text-emerald-700 hover:file:bg-emerald-100 disabled:opacity-50"
+            />
+            {!file && (
+              <p className="mt-1.5 text-[11px] text-zinc-400">
+                Ketuk &quot;Pilih File&quot; di atas untuk pilih dari HP.
+              </p>
+            )}
+            {file && (
+              <div className="mt-2 flex items-start gap-2 rounded-md bg-emerald-50 border border-emerald-200 p-2">
+                <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor" className="text-emerald-600 shrink-0 mt-0.5" aria-hidden="true">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium text-zinc-900 break-all">
+                    {file.name}
+                  </p>
+                  <p className="text-[11px] text-zinc-500 mt-0.5">
+                    {(file.size / 1024).toFixed(0)}KB
+                  </p>
+                </div>
                 <button
                   type="button"
                   onClick={handleClearFile}
@@ -181,13 +197,7 @@ export function AtsCheckerClient() {
                 >
                   Hapus
                 </button>
-              )}
-            </div>
-            {file && (
-              <p className="mt-2 text-xs text-zinc-500 break-all">
-                File dipilih: <span className="font-medium">{file.name}</span> (
-                {(file.size / 1024).toFixed(0)}KB)
-              </p>
+              </div>
             )}
           </div>
 
