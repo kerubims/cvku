@@ -63,6 +63,8 @@ COPY --from=build --chown=cvku:cvku /app/package.json ./package.json
 COPY --from=build --chown=cvku:cvku /app/next.config.ts ./next.config.ts
 # Operational scripts (seed-admin, future migrations) — needed for one-off `docker compose exec`
 COPY --from=build --chown=cvku:cvku /app/scripts ./scripts
+# Source files runtime butuh: lib/dictionaries (id_ID.aff + id_ID.dic) untuk spell-check ATS scorer
+COPY --from=build --chown=cvku:cvku /app/lib ./lib
 
 # Puppeteer cache dir (matches .puppeteerrc.cjs -> .chrome)
 RUN mkdir -p /app/.chrome && chown -R cvku:cvku /app/.chrome
