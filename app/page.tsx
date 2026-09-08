@@ -12,14 +12,29 @@ const problems = [
   {
     title: "CV ditolak ATS sebelum dibaca HRD",
     body: "Template cantik dari Canva atau Word sering gagal dibaca mesin screening. 75% CV fresh graduate ditolak di tahap ini. CVKu dirancang ATS-friendly sejak baris pertama.",
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.75} stroke="currentColor" className="h-5 w-5 text-rose-600">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+      </svg>
+    ),
   },
   {
     title: "Bingung mulai nulis dari mana",
     body: "Tulis pengalamanmu dengan bahasa seadanya, kasih contoh seadanya. AI kami yang rapihin jadi bullet point profesional yang menjual. Cocok untuk fresh graduate dan yang baru pindah karir.",
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.75} stroke="currentColor" className="h-5 w-5 text-amber-600">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+      </svg>
+    ),
   },
   {
-    title: "Tool lain mahal & banyak jebakan",
+    title: "Tool lain mahal \u0026 banyak jebakan",
     body: "Layanan luar pakai langganan tersembunyi, watermark, dan login wajib. CVKu 100% gratis, tanpa login, tanpa watermark. Dibuat dan di-host di Indonesia.",
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.75} stroke="currentColor" className="h-5 w-5 text-emerald-600">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5h16.5a1.5 1.5 0 0 1 1.5 1.5v9.75a1.5 1.5 0 0 1-1.5 1.5H3.75a1.5 1.5 0 0 1-1.5-1.5V6a1.5 1.5 0 0 1 1.5-1.5Zm13.5 6a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0ZM6 10.5h.008v.008H6V10.5Z" />
+      </svg>
+    ),
   },
 ];
 
@@ -199,27 +214,39 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Problems - vertical stack rows */}
-      <section className="border-y border-zinc-200 bg-white">
-        <div className="mx-auto w-full max-w-6xl px-4 pb-24 pt-16">
-          <h2 className="max-w-[36ch] text-2xl font-bold tracking-tight md:text-3xl">
-            Kenapa CV yang udah dibuat capek-capek, ga dipanggil-panggil HRD?
-          </h2>
-          <p className="mt-3 max-w-[60ch] text-sm leading-relaxed text-zinc-600">
-            Tujuh dari sepuluh pelamar di Indonesia gagal di screening pertama, padahal
-            pengalaman dan skill-nya relevan. Ini tiga penyebab paling umum.
-          </p>
-          <div className="mt-10 grid gap-x-10 gap-y-8 md:grid-cols-3">
-            {problems.map((p, i) => (
+      {/* Problems - horizontal scroll / swipe on mobile, 3-col grid on desktop */}
+      <section className="border-y border-zinc-200 bg-white overflow-hidden">
+        <div className="mx-auto w-full max-w-6xl px-4 pb-20 pt-16">
+          <div className="flex items-end justify-between gap-2">
+            <div>
+              <h2 className="max-w-[36ch] text-2xl font-bold tracking-tight md:text-3xl">
+                Kenapa CV yang udah dibuat capek-capek, ga dipanggil-panggil HRD?
+              </h2>
+              <p className="mt-3 max-w-[60ch] text-sm leading-relaxed text-zinc-600">
+                Tujuh dari sepuluh pelamar di Indonesia gagal di screening pertama, padahal
+                pengalaman dan skill-nya relevan. Ini tiga penyebab paling umum.
+              </p>
+            </div>
+            <p className="flex shrink-0 items-center gap-1 text-xs font-semibold text-emerald-700 md:hidden">
+              Geser <span aria-hidden="true">→</span>
+            </p>
+          </div>
+
+          <div className="mt-8 -mx-4 flex snap-x snap-mandatory gap-3.5 overflow-x-auto px-4 pb-4 md:mx-0 md:grid md:snap-none md:grid-cols-3 md:gap-8 md:overflow-visible md:p-0">
+            {problems.map((p) => (
               <div
                 key={p.title}
-                className="reveal-init hidden justify-self-end md:block"
-                style={{ "--reveal-delay": i } as React.CSSProperties}
+                className="problem-card-mobile flex shrink-0 snap-start flex-col justify-between rounded-2xl border border-zinc-200/90 bg-zinc-50/90 p-5 shadow-2xs transition-all hover:border-emerald-200 hover:bg-emerald-50/30 md:w-full md:shrink md:rounded-none md:border-0 md:bg-transparent md:p-0 md:shadow-none md:hover:bg-transparent"
               >
-                <h3 className="font-semibold text-zinc-900">{p.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-zinc-600">
-                  {p.body}
-                </p>
+                <div>
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-zinc-200/60 bg-white shadow-2xs md:border-emerald-100/60 md:bg-emerald-50">
+                    {p.icon}
+                  </div>
+                  <h3 className="mt-4 text-sm font-semibold text-zinc-900 md:mt-3 md:text-base">{p.title}</h3>
+                  <p className="mt-2 text-xs leading-relaxed text-zinc-600 md:text-sm">
+                    {p.body}
+                  </p>
+                </div>
               </div>
             ))}
           </div>

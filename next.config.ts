@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   // Hide dev indicator (less noise in production)
   devIndicators: false,
-  allowedDevOrigins: ["192.168.1.86"],
+  allowedDevOrigins: ["192.168.1.86", "192.168.1.70", "127.0.0.1", "localhost"],
 
   // ===== Performance / SEO quick wins =====
 

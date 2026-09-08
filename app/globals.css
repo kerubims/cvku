@@ -42,6 +42,14 @@ body {
   }
 }
 
+@media (max-width: 767px) {
+  .problem-card-mobile {
+    width: 250px !important;
+    min-width: 250px !important;
+    max-width: 250px !important;
+  }
+}
+
 /* Print: route /full/* tampil bersih, sembunyikan nav & button */
 @media print {
   header,
