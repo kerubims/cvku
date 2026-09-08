@@ -6,6 +6,7 @@ import {
   getContohBySlug,
   getRelated,
 } from "@/lib/contoh-cv/data";
+import { getArticleBySlug } from "@/lib/articles";
 import {
   SITE_URL,
   articleSchema,
@@ -17,38 +18,59 @@ import { JsonLd } from "@/components/json-ld";
 import { CvDocument } from "@/components/cv-document";
 import { FullscreenButton } from "@/components/fullscreen-button";
 import { LastUpdatedBadge } from "@/components/last-updated-badge";
+import { MarkdownRenderer } from "@/components/markdown-renderer";
 
-export const dynamicParams = false;
+export const dynamicParams = true;
 
 /** Pre-render semua slug saat build (SSG) */
 export function generateStaticParams() {
   return CONTOH_CV_LIST.map((c) => ({ slug: c.slug }));
 }
 
-/** Metadata unik per halaman (title + description) — anti-duplicate-content */
-export function generateMetadata({
+/** Metadata unik per halaman (title + description) */
+export async function generateMetadata({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  return params.then(({ slug }) => {
-    const cv = getContohBySlug(slug);
-    if (!cv) return { title: "Contoh CV Tidak Ditemukan" };
+  const { slug } = await params;
+
+  // 1. Check DB first
+  const dbArticle = await getArticleBySlug(slug);
+  if (dbArticle && dbArticle.status === "published") {
     return {
-      title: cv.judul,
-      description: cv.metaDescription,
-      alternates: { canonical: `/contoh-cv/${cv.slug}` },
+      title: dbArticle.title,
+      description: dbArticle.meta_description || dbArticle.title,
+      alternates: { canonical: `/contoh-cv/${dbArticle.slug}` },
       openGraph: {
-        title: cv.judul,
-        description: cv.metaDescription,
+        title: dbArticle.title,
+        description: dbArticle.meta_description || dbArticle.title,
         type: "article",
-        url: `${SITE_URL}/contoh-cv/${cv.slug}`,
-        publishedTime: cv.publishedTime,
-        modifiedTime: cv.modifiedTime,
+        url: `${SITE_URL}/contoh-cv/${dbArticle.slug}`,
+        publishedTime: dbArticle.published_at || dbArticle.created_at,
+        modifiedTime: dbArticle.updated_at,
         locale: "id_ID",
       },
     };
-  });
+  }
+
+  // 2. Fallback to static list
+  const cv = getContohBySlug(slug);
+  if (!cv) return { title: "Contoh CV Tidak Ditemukan" };
+  return {
+    title: cv.judul,
+    description: cv.metaDescription,
+    alternates: { canonical: `/contoh-cv/${cv.slug}` },
+    openGraph: {
+      title: cv.judul,
+      description: cv.metaDescription,
+      type: "article",
+      url: `${SITE_URL}/contoh-cv/${cv.slug}`,
+      publishedTime: cv.publishedTime,
+      modifiedTime: cv.modifiedTime,
+      locale: "id_ID",
+    },
+  };
 }
 
 export default async function ContohCVDetail({
@@ -57,6 +79,91 @@ export default async function ContohCVDetail({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+
+  // 1. Check Database first for published dynamic articles
+  const dbArticle = await getArticleBySlug(slug);
+
+  if (dbArticle && dbArticle.status === "published") {
+    const breadcrumb = breadcrumbSchema([
+      { name: "Beranda", url: SITE_URL },
+      { name: "Contoh CV", url: `${SITE_URL}/contoh-cv` },
+      { name: dbArticle.title, url: `${SITE_URL}/contoh-cv/${dbArticle.slug}` },
+    ]);
+
+    return (
+      <main className="mx-auto max-w-4xl px-4 py-12 sm:py-16">
+        <JsonLd
+          data={[
+            breadcrumb,
+            articleSchema({
+              slug: dbArticle.slug,
+              judul: dbArticle.title,
+              metaDescription: dbArticle.meta_description || "",
+              publishedTime: dbArticle.published_at || dbArticle.created_at,
+              modifiedTime: dbArticle.updated_at,
+            }),
+          ]}
+        />
+
+        <nav aria-label="Breadcrumb" className="text-sm text-zinc-500 mb-6">
+          <ol className="flex items-center gap-1 flex-wrap">
+            <li>
+              <Link href="/" className="hover:text-zinc-900">Beranda</Link>
+            </li>
+            <li aria-hidden="true">/</li>
+            <li>
+              <Link href="/contoh-cv" className="hover:text-zinc-900">Contoh CV</Link>
+            </li>
+            <li aria-hidden="true">/</li>
+            <li className="text-zinc-700 line-clamp-1">{dbArticle.title}</li>
+          </ol>
+        </nav>
+
+        <article>
+          <header className="mb-8 border-b border-zinc-200 pb-6">
+            <span className="inline-block rounded-md bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 border border-emerald-200 mb-3">
+              Artikel CMS CVKu
+            </span>
+            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-zinc-900">
+              {dbArticle.title}
+            </h1>
+            <div className="mt-3 flex items-center gap-2 text-xs text-zinc-500">
+              <LastUpdatedBadge date={dbArticle.updated_at} />
+              {dbArticle.target_keyword && (
+                <span className="rounded bg-zinc-100 px-2 py-0.5 font-mono text-zinc-600">
+                  Target: {dbArticle.target_keyword}
+                </span>
+              )}
+            </div>
+            {dbArticle.meta_description && (
+              <p className="mt-4 text-base text-zinc-600 italic">
+                {dbArticle.meta_description}
+              </p>
+            )}
+          </header>
+
+          <MarkdownRenderer content={dbArticle.content_markdown} />
+
+          <section className="mt-12 text-center border-t border-zinc-200 pt-8">
+            <h2 className="text-xl font-bold text-zinc-900 mb-3">
+              Ingin Buat CV Profesional yang Lolos ATS?
+            </h2>
+            <p className="text-sm text-zinc-600 mb-6 max-w-lg mx-auto">
+              Gunakan builder gratis CVKu tanpa login, tanpa watermark, dan langsung bisa di-download ke PDF.
+            </p>
+            <Link
+              href="/buat"
+              className="inline-block rounded-xl bg-emerald-700 px-6 py-3 font-semibold text-white shadow hover:bg-emerald-800 transition"
+            >
+              Buat CV Sekarang (Gratis)
+            </Link>
+          </section>
+        </article>
+      </main>
+    );
+  }
+
+  // 2. Fallback to static list
   const cv = getContohBySlug(slug);
   if (!cv) notFound();
 
@@ -67,7 +174,6 @@ export default async function ContohCVDetail({
     { name: cv.judul, url: `${SITE_URL}/contoh-cv/${cv.slug}` },
   ]);
 
-  // FAQ: pakai generator (punya 3 FAQ unik per industri, atau override manual kalau cv.faqs ada)
   const faqs = generateFAQs(cv);
 
   return (
@@ -146,7 +252,7 @@ export default async function ContohCVDetail({
           </ul>
         </section>
 
-        {/* CV display — text-selectable, ATS-pure */}
+        {/* CV display */}
         <section className="mb-10">
           <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
             <h2 className="text-xl font-bold text-zinc-900">
@@ -171,15 +277,15 @@ export default async function ContohCVDetail({
           <CvDocument cv={cv} />
           <p className="text-xs text-zinc-500 mt-2">
             *CV di atas adalah teks selectable, sama dengan format PDF ATS yang bisa
-            di-scan sistem. Klik{' '}
+            di-scan sistem. Klik{" "}
             <Link href="/buat" className="text-emerald-700 underline">
               Buat CV
-            </Link>{' '}
+            </Link>{" "}
             untuk hasil versi Anda.
           </p>
         </section>
 
-        {/* FAQ section — untuk FAQPage rich snippet */}
+        {/* FAQ section */}
         <section className="mt-12 rounded-2xl border border-zinc-200 bg-white p-6">
           <h2 className="text-xl font-bold text-zinc-900 mb-4">
             Pertanyaan yang Sering Ditanyakan
