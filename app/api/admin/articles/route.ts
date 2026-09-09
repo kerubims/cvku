@@ -1,61 +1,66 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { requireAdmin, AuthError } from "@/lib/auth";
-import { getAllArticles, createArticle } from "@/lib/articles";
+import { getAllArticles, createArticle, type ArticleType } from "@/lib/articles";
 
-export async function GET(req: Request) {
+export async function GET(request: Request) {
   try {
     await requireAdmin();
-
-    const { searchParams } = new URL(req.url);
+    const { searchParams } = new URL(request.url);
     const status = searchParams.get("status") || "all";
-    const limit = searchParams.get("limit") ? parseInt(searchParams.get("limit")!) : undefined;
+    const type = (searchParams.get("type") as ArticleType) || undefined;
 
-    const articles = await getAllArticles({ status, limit });
+    const articles = await getAllArticles({ status, type });
     return NextResponse.json({ ok: true, articles });
-  } catch (err: any) {
+  } catch (err) {
     if (err instanceof AuthError) {
-      return NextResponse.json({ ok: false, error: err.message }, { status: 401 });
+      return NextResponse.json({ ok: false, error: err.message }, { status: err.statusCode });
     }
-    console.error("[API GET /admin/articles] Error:", err);
+    console.error("GET /api/admin/articles error:", err);
     return NextResponse.json({ ok: false, error: "Internal Server Error" }, { status: 500 });
   }
 }
 
-export async function POST(req: Request) {
+export async function POST(request: Request) {
   try {
     const { user } = await requireAdmin();
-    const body = await req.json();
+    const body = await request.json();
 
     if (!body.title || !body.slug || !body.content_markdown) {
       return NextResponse.json(
-        { ok: false, error: "Judul, slug, dan isi markdown wajib diisi." },
+        { ok: false, error: "Judul, slug, dan isi markdown wajib diisi" },
         { status: 400 }
       );
     }
 
+    const type = body.type || "cv_example";
+
     const article = await createArticle({
       title: body.title,
       slug: body.slug,
-      content_markdown: body.content_markdown,
-      meta_description: body.meta_description,
       target_keyword: body.target_keyword,
+      meta_description: body.meta_description,
+      content_markdown: body.content_markdown,
       status: body.status || "draft",
+      type: type,
       author_id: user.id,
     });
 
-    // Revalidate public routes if published
-    if (article.status === "published") {
+    // Revalidate affected routes
+    if (type === "cv_example") {
       revalidatePath("/contoh-cv");
       revalidatePath(`/contoh-cv/${article.slug}`);
+    } else {
+      revalidatePath("/artikel");
+      revalidatePath(`/artikel/${article.slug}`);
     }
 
     return NextResponse.json({ ok: true, article }, { status: 201 });
-  } catch (err: any) {
+  } catch (err) {
     if (err instanceof AuthError) {
-      return NextResponse.json({ ok: false, error: err.message }, { status: 401 });
+      return NextResponse.json({ ok: false, error: err.message }, { status: err.statusCode });
     }
-    console.error("[API POST /admin/articles] Error:", err);
-    return NextResponse.json({ ok: false, error: err.message || "Internal Server Error" }, { status: 500 });
+    console.error("POST /api/admin/articles error:", err);
+    return NextResponse.json({ ok: false, error: "Internal Server Error" }, { status: 500 });
   }
 }

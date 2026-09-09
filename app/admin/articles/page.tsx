@@ -1,9 +1,5 @@
-import { ArticlesAdminClient } from "./client";
-
-export const metadata = {
-  title: "Kelola Artikel SEO (CMS) — Admin CVKu",
-};
+import { redirect } from "next/navigation";
 
 export default function AdminArticlesPage() {
-  return <ArticlesAdminClient />;
+  redirect("/admin/contoh-cv");
 }

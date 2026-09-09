@@ -1,38 +1,36 @@
 import type { MetadataRoute } from "next";
 import Link from "next/link";
 import { CONTOH_CV_LIST } from "@/lib/contoh-cv/data";
-import { FAQS, SITE_URL, SOFTWARE_SCHEMA, ORG_SCHEMA } from "@/lib/seo/schemas";
+import {
+  FAQS,
+  SITE_URL,
+  SOFTWARE_SCHEMA,
+  ORG_SCHEMA,
+} from "@/lib/seo/schemas";
 import { JsonLd } from "@/components/json-ld";
 import { FaqAccordion } from "@/components/faq-accordion";
 import { getAllArticles } from "@/lib/articles";
+import { ArticleType } from "@/lib/articles";
 
-export const metadata = {
-  title: "Contoh CV per Lowongan — Template Lolos ATS 2026",
-  description:
-    "Kumpulan contoh CV Indonesia yang lolos ATS: fresh graduate, magang, admin, kasir, guru, marketing, dan lainnya. Lihat, tiru format, buat CV serupa gratis.",
-  alternates: {
-    canonical: "/contoh-cv",
-  },
-};
-
-export const revalidate = 60; // ISR: revalidate every 60 seconds
+export const revalidate = 60;
 
 export default async function ContohCVIndex() {
   // Group static data by category
-  const byKategori = CONTOH_CV_LIST.reduce<Record<string, typeof CONTOH_CV_LIST>>(
-    (acc, c) => {
-      (acc[c.kategori] ||= []).push(c);
-      return acc;
-    },
-    {}
-  );
+  const byKategori = CONTOH_CV_LIST.reduce<
+    Record<string, (typeof CONTOH_CV_LIST)[0][]>
+  >((acc, c) => {
+    (acc[c.kategori] ||= []).push(c);
+    return acc;
+  }, {});
 
-  // Fetch dynamic articles from DB (published only)
+  // Fetch dynamic articles from DB (published only, type = 'cv_example')
   let dynamicArticles: Awaited<ReturnType<typeof getAllArticles>> = [];
   try {
-    dynamicArticles = await getAllArticles({ status: "published" });
+    dynamicArticles = await getAllArticles({
+      status: "published",
+      type: "cv_example" as ArticleType,
+    });
   } catch (e) {
-    // If DB is unavailable, gracefully fallback to static only
     console.error("Failed to fetch dynamic articles:", e);
   }
 
@@ -58,7 +56,9 @@ export default async function ContohCVIndex() {
         <nav aria-label="Breadcrumb" className="text-sm text-zinc-500 mb-4">
           <ol className="flex items-center gap-1">
             <li>
-              <Link href="/" className="hover:text-zinc-900">Beranda</Link>
+              <Link href="/" className="hover:text-zinc-900">
+                Beranda
+              </Link>
             </li>
             <li aria-hidden="true">/</li>
             <li className="text-zinc-700">Contoh CV</li>
@@ -68,22 +68,28 @@ export default async function ContohCVIndex() {
           Contoh CV yang Lolos ATS — 10 Niche Teratas
         </h1>
         <p className="mt-4 text-lg text-zinc-600 max-w-3xl">
-          Pilih niche pekerjaan di bawah. Tiap contoh CV ditulis dengan struktur ATS-pure,
-          lengkap dengan tips spesifik supaya HRD tertarik melirik. Bebas tiru formatnya
-          atau buat CV serupa langsung dari{" "}
-          <Link href="/buat" className="text-emerald-700 underline underline-offset-4">
+          Pilih niche pekerjaan di bawah. Tiap contoh CV ditulis dengan struktur
+          ATS-pure, lengkap dengan tips spesifik supaya HRD tertarik melihat.
+          Bebas tiru formatnya atau buat CV serupa langsung dari{" "}
+          <Link
+            href="/buat"
+            className="text-emerald-700 underline underline-offset-4"
+          >
             builder gratis
           </Link>
           .
         </p>
       </header>
 
-      {/* Dynamic CMS Articles Section - blended as regular CV examples */}
+      {/* Dynamic CV Examples Section */}
       {dynamicArticles.length > 0 && (
         <section className="mb-10">
           <h2 className="text-xl font-semibold text-zinc-800 mb-4">
-            Contoh CV Terbaru{" "}
-            <span className="text-sm font-normal text-zinc-500">({dynamicArticles.length} contoh)</span>
+            Contoh CV Terbaru (dinamis)
+            <span className="text-sm font-normal text-zinc-500">
+              {" "}
+              ({dynamicArticles.length} contoh)
+            </span>
           </h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {dynamicArticles.map((article) => (
@@ -114,7 +120,9 @@ export default async function ContohCVIndex() {
         <section key={kategori} className="mb-10">
           <h2 className="text-xl font-semibold text-zinc-800 mb-4">
             {kategori}{" "}
-            <span className="text-sm font-normal text-zinc-500">({items.length} contoh)</span>
+            <span className="text-sm font-normal text-zinc-500">
+              ({items.length} contoh)
+            </span>
           </h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {items.map((c) => (

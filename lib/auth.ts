@@ -79,18 +79,24 @@ const MAX_FAILED_ATTEMPTS = 5;
 const LOCKOUT_MINUTES = 15;
 
 export class AuthError extends Error {
+  code: string;
+  statusCode: number;
   constructor(
     message: string,
-    public code:
+    code:
       | "INVALID_INPUT"
       | "INVALID_CREDENTIALS"
       | "ACCOUNT_LOCKED"
       | "ACCOUNT_DISABLED"
       | "RATE_LIMITED"
       | "SERVER_ERROR"
+      | string = "UNAUTHORIZED",
+    statusCode: number = 401
   ) {
     super(message);
     this.name = "AuthError";
+    this.code = code;
+    this.statusCode = statusCode;
   }
 }
 

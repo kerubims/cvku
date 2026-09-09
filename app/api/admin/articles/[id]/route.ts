@@ -4,82 +4,102 @@ import { requireAdmin, AuthError } from "@/lib/auth";
 import { getArticleById, updateArticle, deleteArticle } from "@/lib/articles";
 
 export async function GET(
-  req: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await requireAdmin();
     const { id } = await params;
-
     const article = await getArticleById(id);
+
     if (!article) {
-      return NextResponse.json({ ok: false, error: "Artikel tidak ditemukan." }, { status: 404 });
+      return NextResponse.json(
+        { ok: false, error: "Artikel tidak ditemukan" },
+        { status: 404 }
+      );
     }
 
     return NextResponse.json({ ok: true, article });
-  } catch (err: any) {
+  } catch (err) {
     if (err instanceof AuthError) {
-      return NextResponse.json({ ok: false, error: err.message }, { status: 401 });
+      return NextResponse.json({ ok: false, error: err.message }, { status: err.statusCode });
     }
-    console.error("[API GET /admin/articles/[id]] Error:", err);
     return NextResponse.json({ ok: false, error: "Internal Server Error" }, { status: 500 });
   }
 }
 
 export async function PATCH(
-  req: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await requireAdmin();
     const { id } = await params;
-    const body = await req.json();
+    const body = await request.json();
 
-    const updated = await updateArticle(id, body);
-    if (!updated) {
-      return NextResponse.json({ ok: false, error: "Gagal memperbarui artikel." }, { status: 404 });
+    const current = await getArticleById(id);
+    if (!current) {
+      return NextResponse.json(
+        { ok: false, error: "Artikel tidak ditemukan" },
+        { status: 404 }
+      );
     }
 
-    // Revalidate public routes
-    revalidatePath("/contoh-cv");
-    revalidatePath(`/contoh-cv/${updated.slug}`);
+    const article = await updateArticle(id, body);
 
-    return NextResponse.json({ ok: true, article: updated });
-  } catch (err: any) {
+    if (article) {
+      const type = article.type || "cv_example";
+      if (type === "cv_example") {
+        revalidatePath("/contoh-cv");
+        revalidatePath(`/contoh-cv/${article.slug}`);
+      } else {
+        revalidatePath("/artikel");
+        revalidatePath(`/artikel/${article.slug}`);
+      }
+    }
+
+    return NextResponse.json({ ok: true, article });
+  } catch (err) {
     if (err instanceof AuthError) {
-      return NextResponse.json({ ok: false, error: err.message }, { status: 401 });
+      return NextResponse.json({ ok: false, error: err.message }, { status: err.statusCode });
     }
-    console.error("[API PATCH /admin/articles/[id]] Error:", err);
-    return NextResponse.json({ ok: false, error: err.message || "Internal Server Error" }, { status: 500 });
+    return NextResponse.json({ ok: false, error: "Internal Server Error" }, { status: 500 });
   }
 }
 
 export async function DELETE(
-  req: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await requireAdmin();
     const { id } = await params;
 
-    const article = await getArticleById(id);
-    const success = await deleteArticle(id);
-
-    if (!success) {
-      return NextResponse.json({ ok: false, error: "Gagal menghapus artikel." }, { status: 400 });
+    const current = await getArticleById(id);
+    if (current) {
+      const type = current.type || "cv_example";
+      if (type === "cv_example") {
+        revalidatePath("/contoh-cv");
+        revalidatePath(`/contoh-cv/${current.slug}`);
+      } else {
+        revalidatePath("/artikel");
+        revalidatePath(`/artikel/${current.slug}`);
+      }
     }
 
-    if (article) {
-      revalidatePath("/contoh-cv");
-      revalidatePath(`/contoh-cv/${article.slug}`);
+    const success = await deleteArticle(id);
+    if (!success) {
+      return NextResponse.json(
+        { ok: false, error: "Gagal menghapus artikel" },
+        { status: 400 }
+      );
     }
 
     return NextResponse.json({ ok: true, message: "Artikel berhasil dihapus." });
-  } catch (err: any) {
+  } catch (err) {
     if (err instanceof AuthError) {
-      return NextResponse.json({ ok: false, error: err.message }, { status: 401 });
+      return NextResponse.json({ ok: false, error: err.message }, { status: err.statusCode });
     }
-    console.error("[API DELETE /admin/articles/[id]] Error:", err);
     return NextResponse.json({ ok: false, error: "Internal Server Error" }, { status: 500 });
   }
 }
