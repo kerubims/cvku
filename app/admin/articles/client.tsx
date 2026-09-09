@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { calculateSeoScore, type Article } from "@/lib/articles";
+import { calculateSeoScore } from "@/lib/seo-calculator";
+import type { Article } from "@/lib/articles";
 
 export function ArticlesAdminClient() {
   const [articles, setArticles] = useState<Article[]>([]);
