@@ -127,21 +127,27 @@ function validateAnalysis(obj: unknown): AiAnalysis | null {
  * 2026-08-29: retry with fallback models — primary `auto/cheap` kadang timeout/antri,
  * fallback ke `auto/fast` (juga big-pickle pool, biasanya lebih cepet) atau `openrouter/free`.
  */
+/**
+ * Model chain untuk ATS AI Analysis (2026-09-11 fix timeout issues)
+ *
+ * Priority:
+ * 1. openrouter/deepseek-r1-distill-70b:free - ~3-5s, JSON-friendly
+ * 2. openrouter/llama-3.3-70b-instruct:free - ~4-6s, JSON-friendly  
+ * 3. openrouter/free (generic) - fallback utama ~9-15s
+ * 4. FREEEEE - fallback pool terakhir
+ */
 export async function analyzeCvWithAi(cvText: string): Promise<AiAnalysis> {
   const models = [
-    process.env.OMNIROUTE_MODEL || "openrouter/free", // ~9-15s, paling reliable (2026-08-29)
-    "FREEEEE", // 1-2s, alternatif pool sama, backup utama
-    "auto/cheap",
-    "auto/fast",
+    "openrouter/deepseek-r1-distill-70b:free", // 3-5s, JSON-friendly (priority utama)
+    "openrouter/llama-3.3-70b-instruct:free", // 4-6s, JSON-friendly (backup utama)
+    "openrouter/free", // ~9-15s, fallback generik
+    "FREEEEE", // Pool round-robin terakhir
   ];
-  const primaryTimeoutMs = 25_000; // toleran spike 15-25s di openrouter/free pool
-  const fallbackTimeoutMs = 20_000; // FREEEEE/auto/* biasanya <10s
+  const timeoutMs = 25_000; // Semua model timeout after 25s
 
   let lastError: Error | null = null;
   for (let i = 0; i < models.length; i++) {
     const model = models[i];
-    const isPrimary = i === 0;
-    const timeoutMs = isPrimary ? primaryTimeoutMs : fallbackTimeoutMs;
     const start = Date.now();
     try {
       const content = await omnirouteChat(
