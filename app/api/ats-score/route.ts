@@ -100,8 +100,10 @@ export async function POST(request: NextRequest) {
       );
     }
   } catch (err) {
+    console.error("[ats-score] input parse error:", err);
+    const message = err instanceof Error ? err.message : "Gagal membaca input";
     return Response.json(
-      { ok: false, error: "Gagal membaca input", code: "PARSE_ERROR" },
+      { ok: false, error: message, code: "PARSE_ERROR" },
       { status: 400 }
     );
   }
