@@ -138,10 +138,10 @@ function validateAnalysis(obj: unknown): AiAnalysis | null {
  */
 export async function analyzeCvWithAi(cvText: string): Promise<AiAnalysis> {
   const models = [
-    "openrouter/deepseek-r1-distill-70b:free", // 3-5s, JSON-friendly (priority utama)
-    "openrouter/llama-3.3-70b-instruct:free", // 4-6s, JSON-friendly (backup utama)
-    "openrouter/free", // ~9-15s, fallback generik
-    "FREEEEE", // Pool round-robin terakhir
+    "auto/best-free", // OmniRoute pool (ultra fast ~30ms)
+    "auto/cheap",     // OmniRoute cheap fallback
+    "auto/fast",      // OmniRoute fast fallback
+    "FREEEEE",        // Pool round-robin terakhir
   ];
   const timeoutMs = 25_000; // Semua model timeout after 25s
 
