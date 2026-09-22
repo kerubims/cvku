@@ -10,12 +10,6 @@ export function HeroSection() {
             className="lg:col-span-7 flex flex-col items-start reveal-init"
             style={{ "--reveal-delay": "100ms" } as React.CSSProperties}
           >
-            {/* Contextual Notification Pill */}
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-surface-border text-xs font-medium text-slate-700 mb-6 shadow-sm hover:border-emerald-300 transition-colors">
-              <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span>Diperbarui sesuai standar screening BUMN &amp; Tech 2026</span>
-            </div>
-            
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-950 leading-[1.15] mb-6">
               Bikin CV Lolos ATS, <br className="hidden sm:inline" />
               <span className="underline decoration-brand-500/40 decoration-wavy decoration-2">100% Gratis.</span> Tanpa Ribet.

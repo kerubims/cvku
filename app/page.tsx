@@ -34,9 +34,6 @@ export default function LandingPage() {
             >
               CV<span className="text-emerald-700">Ku</span>
             </Link>
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200">
-              100% Gratis &amp; Terbuka
-            </span>
           </div>
 
           <nav
