@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Keep binary/native parsers external so bundler doesn't break pdfjs internals
+  serverExternalPackages: ["pdf-parse-fixed", "mammoth"],
+
   // Hide dev indicator (less noise in production)
   devIndicators: false,
   allowedDevOrigins: ["192.168.1.86", "192.168.1.70", "127.0.0.1", "localhost"],

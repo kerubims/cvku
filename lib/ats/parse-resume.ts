@@ -64,7 +64,7 @@ export async function parseResumeFile(
 
   try {
     if (isPdf) {
-      const data = await pdfParse(buffer);
+      const data = await pdfParse(new Uint8Array(buffer));
       return {
         text: cleanText(data.text),
         meta: {

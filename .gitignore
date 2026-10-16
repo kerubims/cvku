@@ -42,3 +42,7 @@ next-env.d.ts
 
 # local chrome binary
 /.chrome
+
+# next dev generated files
+AGENTS.md
+CLAUDE.md

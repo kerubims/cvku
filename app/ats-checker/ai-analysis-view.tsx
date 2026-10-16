@@ -26,7 +26,6 @@ export function AiAnalysisView({ analysis }: { analysis: AiAnalysis }) {
         </div>
         <h2 className="text-base sm:text-xl font-bold text-zinc-900">
           Analisis AI
-          <span className="hidden sm:inline"> (OmniRoute)</span>
         </h2>
       </div>
 

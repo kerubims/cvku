@@ -218,7 +218,7 @@ export function AtsCheckerClient() {
                 <p className="mt-1 text-xs text-zinc-600 leading-relaxed">
                   AI akan menilai <strong>grammar, tone profesional, dan kekuatan narasi</strong>.
                   Skor akhir jadi gabungan skor otomatis (70%) + AI (30%). Defaultnya nonaktif
-                  supaya cepat. Powered by OmniRoute.
+                  supaya cepat.
                 </p>
               </div>
             </label>
