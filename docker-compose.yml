@@ -32,10 +32,12 @@ services:
       - db
     environment:
       NODE_ENV: production
-      DATABASE_URL: postgresql://cvku:VS1rY7X6VfsysTXZCcLyh1iDVWa9v@shared-postgres:5432/cvku
+      DATABASE_URL: postgresql://cvku:***@shared-postgres:5432/cvku
       NOVITA_API_KEY: ${NOVITA_API_KEY}
       ADMIN_TOKEN: ${ADMIN_TOKEN}
       IRON_SESSION_PASSWORD: ${IRON_SESSION_PASSWORD}
+      NINEROUTER_API_KEY: ${NINEROUTER_API_KEY:-}
+      NINEROUTER_BASE_URL: ${NINEROUTER_BASE_URL:-http://192.168.1.89:20129/v1}
     ports:
       - "9013:3000"
     networks:
