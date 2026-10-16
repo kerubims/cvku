@@ -68,13 +68,15 @@ Return JSON valid. TIDAK BOLEH ada teks di luar JSON.`;
 }
 
 function tryParseJson(text: string): AiAnalysis | null {
+  // Strip markdown code fences if present (e.g. ```json ... ```)
+  const cleaned = text.replace(/```(?:json)?\s*([\s\S]*?)\s*```/g, "$1").trim();
   // Try direct parse
   try {
-    const parsed = JSON.parse(text);
+    const parsed = JSON.parse(cleaned);
     return validateAnalysis(parsed);
   } catch {
     // Try extract JSON block
-    const match = text.match(/\{[\s\S]*\}/);
+    const match = cleaned.match(/\{[\s\S]*\}/);
     if (match) {
       try {
         return validateAnalysis(JSON.parse(match[0]));
@@ -138,12 +140,10 @@ function validateAnalysis(obj: unknown): AiAnalysis | null {
  */
 export async function analyzeCvWithAi(cvText: string): Promise<AiAnalysis> {
   const models = [
-    "auto/best-free", // OmniRoute pool (ultra fast ~30ms)
-    "auto/cheap",     // OmniRoute cheap fallback
-    "auto/fast",      // OmniRoute fast fallback
-    "FREEEEE",        // Pool round-robin terakhir
+    "agy",        // 9router Antigravity (Gemini 3.8 / Claude Opus)
+    "FREE-CODER", // 9router fallback pool (Atria, DeepSeek, GLM, MiniMax)
   ];
-  const timeoutMs = 25_000; // Semua model timeout after 25s
+  const timeoutMs = 30_000; // Timeout 30s per model
 
   let lastError: Error | null = null;
   for (let i = 0; i < models.length; i++) {

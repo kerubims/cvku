@@ -1,26 +1,25 @@
 /**
- * OmniRoute AI client — untuk ATS Score Checker (grammar, tone, impact analysis).
- *
- * NOTE: User-specified routing (2026-08-28): ATS Score Checker pakai OmniRoute,
- * fitur AI lain pakai Novita.
+ * AI client untuk ATS Score Checker (grammar, tone, impact analysis).
+ * Pointing ke 9router AI Gateway (sebelumnya OmniRoute).
  *
  * Env vars:
- * - OMNIROUTE_BASE_URL (default: http://192.168.1.89:20128/v1)
- * - OMNIROUTE_API_KEY (optional — endpoint bisa tanpa key, tergantung config)
- * - OMNIROUTE_MODEL (default: auto/best-free — gateway pilih model free terbaik)
- *
- * Server 192.168.1.89 LAN access: container cvku-web bisa reach gateway
- * via host LAN network (compose external network atau host.docker.internal).
+ * - NINEROUTER_BASE_URL / OMNIROUTE_BASE_URL (default: http://192.168.1.89:20129/v1)
+ * - NINEROUTER_API_KEY / OMNIROUTE_API_KEY (API key dari 9router)
+ * - NINEROUTER_MODEL / OMNIROUTE_MODEL (default: agy)
  */
 
-const BASE_URL = process.env.OMNIROUTE_BASE_URL || "http://192.168.1.89:20128/v1";
-// 2026-08-29: setelah benchmark — `auto/cheap` & `auto/fast` lagi antri panjang
-// (25-40s timeout), `openrouter/free` paling cepet & reliable (9-17s, support JSON).
-// best-free chain (deepseek-v3.2, claude-haiku) kena 429/400, deepseek-v4-flash kena
-// content filter di IP server, jadi kita pakai `openrouter/free` (minimax/minimax-m3:free).
-const MODEL = process.env.OMNIROUTE_MODEL || "openrouter/free";
-// Fallback chain kalau primary timeout/429.
-const FALLBACK_MODELS = ["auto/cheap", "auto/fast"];
+const BASE_URL =
+  process.env.NINEROUTER_BASE_URL ||
+  process.env.OMNIROUTE_BASE_URL ||
+  "http://192.168.1.89:20129/v1";
+
+const MODEL =
+  process.env.NINEROUTER_MODEL ||
+  process.env.OMNIROUTE_MODEL ||
+  "agy";
+
+// Fallback chain kalau primary timeout/429
+const FALLBACK_MODELS = ["FREE-CODER"];
 
 export interface ChatMessage {
   role: "system" | "user" | "assistant";
@@ -58,7 +57,9 @@ export async function omnirouteChat(
     responseFormat,
   } = options;
 
-  const apiKey = process.env.OMNIROUTE_API_KEY;
+  const apiKey =
+    process.env.NINEROUTER_API_KEY ||
+    process.env.OMNIROUTE_API_KEY;
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
   };
