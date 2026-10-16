@@ -1,8 +1,3 @@
-# CVKu - production stack
-# Web: 9013:3000 (LAN-accessible)
-# DB:  127.0.0.1:9014:5432 (localhost only - host can psql, LAN cannot scan)
-# Build context: repo root (uses ./Dockerfile)
-
 services:
   db:
     image: postgres:16-alpine
@@ -10,13 +5,11 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-cvku}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required - set in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB:-cvku}
     volumes:
       - pgdata:/var/lib/postgresql/data
-      # Init SQL runs only on first startup when /var/lib/postgresql/data is empty
       - ./db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
-    # Bind to loopback only - host machine can psql, but LAN/internet cannot scan
     ports:
       - "127.0.0.1:9014:5432"
     healthcheck:
@@ -27,6 +20,7 @@ services:
       start_period: 20s
     networks:
       - cvku-net
+      - shared-db-net
 
   web:
     build:
@@ -35,25 +29,32 @@ services:
     container_name: cvku-web
     restart: unless-stopped
     depends_on:
-      db:
-        condition: service_healthy
+      - db
     environment:
       NODE_ENV: production
-      # Inside compose network, db is reachable as hostname "db"
-      DATABASE_URL: postgresql://${POSTGRES_USER:-cvku}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-cvku}
-      NOVITA_API_KEY: ${NOVITA_API_KEY:?NOVITA_API_KEY required - set in .env}
-      ADMIN_TOKEN: ${ADMIN_TOKEN:?ADMIN_TOKEN required - set in .env}
-      # iron-session secret (32+ char random). Generate:
-      #   openssl rand -base64 32
-      IRON_SESSION_PASSWORD: ${IRON_SESSION_PASSWORD:?IRON_SESSION_PASSWORD required - set in .env}
-      # Public base URL (auto-detected from request headers if unset)
-      # AUTH_BASE_URL: https://cvku.ksm.web.id
-      # Tighter cookie/CORS if needed later:
-      # ALLOWED_DEV_ORIGINS: "192.168.1.86"
+      DATABASE_URL: postgresql://cvku:VS1rY7X6VfsysTXZCcLyh1iDVWa9v@shared-postgres:5432/cvku
+      NOVITA_API_KEY: ${NOVITA_API_KEY}
+      ADMIN_TOKEN: ${ADMIN_TOKEN}
+      IRON_SESSION_PASSWORD: ${IRON_SESSION_PASSWORD}
     ports:
       - "9013:3000"
     networks:
       - cvku-net
+      - shared-db-net
+
+  studio:
+    build:
+      context: .
+      dockerfile: Dockerfile.studio
+    container_name: cvku-studio
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL required - set in .env}
+    ports:
+      - "9015:9015"
+    networks:
+      - cvku-net
+      - shared-db-net
 
 volumes:
   pgdata:
@@ -63,3 +64,5 @@ networks:
   cvku-net:
     name: cvku-net
     driver: bridge
+  shared-db-net:
+    external: true
