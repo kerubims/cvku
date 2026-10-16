@@ -157,6 +157,12 @@ export default async function ContohCVDetail({
             >
               Buat CV Sekarang (Gratis)
             </Link>
+            <p className="mt-4 text-sm text-zinc-600">
+              Sudah punya CV?{" "}
+              <Link href="/ats-checker" className="text-emerald-700 underline font-medium">
+                Cek skor ATS-nya gratis
+                </Link>
+              </p>
           </section>
         </article>
       </main>
@@ -343,6 +349,12 @@ export default async function ContohCVDetail({
           >
             Buat CV Seperti Ini (Gratis)
           </Link>
+          <p className="mt-4 text-sm text-zinc-600">
+            Sudah punya CV?{" "}
+            <Link href="/ats-checker" className="text-emerald-700 underline font-medium">
+              Cek skor ATS-nya gratis
+              </Link>
+            </p>
         </section>
       </article>
     </main>
