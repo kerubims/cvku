@@ -1,7 +1,9 @@
 import type { MetadataRoute } from "next";
 import { CONTOH_CV_LIST } from "@/lib/contoh-cv/data";
 
+
 const BASE = "https://cvku.ksm.web.id";
+
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
@@ -35,5 +37,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency: "weekly" as const,
     priority: 0.85,
   };
-  return [landing, contohHub, atsChecker, privasi, ...contoh];
+  const artikel = {
+    url: `${BASE}/artikel`,
+    lastModified: now,
+    changeFrequency: "weekly" as const,
+    priority: 0.7,
+  };
+  return [landing, contohHub, atsChecker, artikel, privasi, ...contoh];
 }
